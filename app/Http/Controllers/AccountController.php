@@ -64,7 +64,7 @@ class AccountController extends Controller
             $validated['icon'] ?? null,
         );
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'Compte créé.']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('accounts.flash.created')]);
 
         return to_route('accounts.index');
     }
@@ -116,7 +116,7 @@ class AccountController extends Controller
             $validated['icon'] ?? null,
         );
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'Compte mis à jour.']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('accounts.flash.updated')]);
 
         return to_route('accounts.index');
     }
@@ -127,7 +127,7 @@ class AccountController extends Controller
 
         $account->delete();
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'Compte archivé.']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('accounts.flash.archived')]);
 
         return to_route('accounts.index');
     }
@@ -142,7 +142,7 @@ class AccountController extends Controller
 
         $account->restore();
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'Compte restauré.']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('accounts.flash.restored')]);
 
         return to_route('accounts.index');
     }
