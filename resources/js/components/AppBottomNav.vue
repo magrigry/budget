@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import { ArrowLeftRight, Settings, Tag, Wallet } from '@lucide/vue';
+import { index as accountsIndex } from '@/actions/App/Http/Controllers/AccountController';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import type { NavItem } from '@/types';
 
@@ -14,7 +15,7 @@ const navItems: NavItem[] = [
     },
     {
         title: 'Comptes',
-        href: { url: '/accounts', method: 'get' },
+        href: accountsIndex(),
         icon: Wallet,
     },
     {
@@ -31,14 +32,20 @@ const navItems: NavItem[] = [
 </script>
 
 <template>
-    <nav class="fixed bottom-0 left-0 right-0 z-50 border-t bg-background md:hidden">
+    <nav
+        class="fixed right-0 bottom-0 left-0 z-50 border-t bg-background md:hidden"
+    >
         <div class="flex h-16 items-center justify-around px-2">
             <Link
                 v-for="item in navItems"
                 :key="item.title"
                 :href="item.href"
                 class="flex flex-1 flex-col items-center gap-1 py-2 text-xs transition-colors"
-                :class="isCurrentOrParentUrl(item.href) ? 'text-primary' : 'text-muted-foreground'"
+                :class="
+                    isCurrentOrParentUrl(item.href)
+                        ? 'text-primary'
+                        : 'text-muted-foreground'
+                "
             >
                 <component :is="item.icon" class="size-5" />
                 <span>{{ item.title }}</span>

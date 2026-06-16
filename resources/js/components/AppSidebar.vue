@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import { ArrowLeftRight, LayoutGrid, Settings, Tag, Wallet } from '@lucide/vue';
+import { index as accountsIndex } from '@/actions/App/Http/Controllers/AccountController';
 import AppLogo from '@/components/AppLogo.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -29,7 +30,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Comptes',
-        href: { url: '/accounts', method: 'get' },
+        href: accountsIndex(),
         icon: Wallet,
     },
     {
