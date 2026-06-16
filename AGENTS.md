@@ -219,4 +219,9 @@ Vue components must have a single root element.
 # Application
 
 Cette application est une **application de gestion de budget personnelle**. Elle permet à un utilisateur de suivre ses finances : revenus, dépenses, catégories, soldes et historique de transactions.
+
+# Design & UI
+
+- **Graphiques** : Chart.js via `vue-chartjs` (post-MVP — ne pas installer d'autre lib de graphiques).
+- **Responsive mobile-first** dès le MVP, en anticipation d'une PWA post-MVP.
 </application-context>
