@@ -70,10 +70,13 @@
         ],
         "types:check": [
             "@php artisan ide-helper:models --write --ansi",
+            "pint app/Models/ --quiet",
             "phpstan analyse --memory-limit=512M"
         ],
         "test": [
             "@php artisan config:clear --ansi",
+            "@php artisan ide-helper:models --write --ansi",
+            "pint app/Models/ --quiet",
             "@lint:check",
             "@types:check",
             "@php artisan test"
