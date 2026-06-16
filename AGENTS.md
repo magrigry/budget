@@ -214,3 +214,9 @@ Vue components must have a single root element.
 - IMPORTANT: Activate `inertia-vue-development` when working with Inertia Vue client-side patterns.
 
 </laravel-boost-guidelines>
+
+<application-context>
+# Application
+
+Cette application est une **application de gestion de budget personnelle**. Elle permet à un utilisateur de suivre ses finances : revenus, dépenses, catégories, soldes et historique de transactions.
+</application-context>
