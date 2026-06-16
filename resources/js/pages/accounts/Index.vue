@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Archive, ArchiveRestore, Pencil, Plus } from '@lucide/vue';
+import { useI18n } from 'vue-i18n';
 import {
     create,
     destroy,
@@ -13,6 +14,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/composables/useFormatCurrency';
 import type { Account } from '@/types';
+
+const { t } = useI18n();
 
 const props = defineProps<{
     accounts: Account[];
@@ -37,24 +40,24 @@ function restoreAccount(id: number) {
 </script>
 
 <template>
-    <Head title="Comptes" />
+    <Head :title="t('accounts.index.title')" />
 
     <div class="space-y-6 p-4 md:p-6">
         <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-bold">Comptes</h1>
+            <h1 class="text-2xl font-bold">{{ t('accounts.index.title') }}</h1>
             <div class="flex gap-2">
                 <Button variant="outline" size="sm" @click="toggleArchived">
                     <Archive class="mr-2 size-4" />
                     {{
                         showArchived
-                            ? 'Masquer les archivés'
-                            : 'Inclure les archivés'
+                            ? t('accounts.index.hideArchived')
+                            : t('accounts.index.showArchived')
                     }}
                 </Button>
                 <Button as-child size="sm">
                     <Link :href="create()">
                         <Plus class="mr-2 size-4" />
-                        Nouveau compte
+                        {{ t('accounts.index.new') }}
                     </Link>
                 </Button>
             </div>
@@ -64,8 +67,13 @@ function restoreAccount(id: number) {
             v-if="accounts.length === 0"
             class="py-12 text-center text-muted-foreground"
         >
-            Aucun compte{{ showArchived ? ' archivé' : '' }}. Créez-en un pour
-            commencer.
+            {{
+                t(
+                    showArchived
+                        ? 'accounts.index.emptyArchived'
+                        : 'accounts.index.empty',
+                )
+            }}
         </div>
 
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

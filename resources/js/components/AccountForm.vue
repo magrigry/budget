@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { Link, useForm } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import { index } from '@/actions/App/Http/Controllers/AccountController';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useDetectedCurrency } from '@/composables/useDetectedCurrency';
+
+const { t } = useI18n();
 
 interface AccountData {
     name: string;
@@ -23,7 +26,7 @@ const props = withDefaults(
         onSubmit: (form: ReturnType<typeof useForm<AccountData>>) => void;
     }>(),
     {
-        submitLabel: 'Enregistrer',
+        submitLabel: undefined,
         lockInitialBalance: false,
     },
 );
@@ -53,12 +56,12 @@ function handleSubmit() {
 <template>
     <form class="space-y-6" @submit.prevent="handleSubmit">
         <div class="space-y-2">
-            <Label for="name">Nom du compte</Label>
+            <Label for="name">{{ t('accounts.form.name') }}</Label>
             <Input
                 id="name"
                 v-model="form.name"
                 type="text"
-                placeholder="Ex : Compte courant"
+                :placeholder="t('accounts.form.namePlaceholder')"
                 required
                 autofocus
             />
@@ -67,7 +70,7 @@ function handleSubmit() {
 
         <div class="grid grid-cols-2 gap-4">
             <div class="space-y-2">
-                <Label for="currency">Devise</Label>
+                <Label for="currency">{{ t('accounts.form.currency') }}</Label>
                 <Input
                     id="currency"
                     v-model="form.currency"
@@ -81,7 +84,9 @@ function handleSubmit() {
             </div>
 
             <div class="space-y-2">
-                <Label for="initial_balance">Solde initial</Label>
+                <Label for="initial_balance">{{
+                    t('accounts.form.initialBalance')
+                }}</Label>
                 <Input
                     id="initial_balance"
                     v-model="form.initial_balance"
@@ -100,17 +105,19 @@ function handleSubmit() {
                     v-if="lockInitialBalance"
                     class="text-xs text-muted-foreground"
                 >
-                    Le solde initial ne peut pas être modifié après création.
+                    {{ t('accounts.form.initialBalanceLocked') }}
                 </p>
                 <InputError v-else :message="form.errors.initial_balance" />
             </div>
         </div>
 
         <div class="space-y-2">
-            <Label for="color"
-                >Couleur
-                <span class="text-muted-foreground">(optionnel)</span></Label
-            >
+            <Label for="color">
+                {{ t('accounts.form.color') }}
+                <span class="text-muted-foreground">{{
+                    t('accounts.form.colorOptional')
+                }}</span>
+            </Label>
             <div class="flex items-center gap-3">
                 <input
                     id="color"
@@ -121,7 +128,7 @@ function handleSubmit() {
                 <Input
                     v-model="form.color"
                     type="text"
-                    placeholder="#3b82f6"
+                    :placeholder="t('accounts.form.colorPlaceholder')"
                     maxlength="7"
                     class="font-mono"
                 />
@@ -131,10 +138,10 @@ function handleSubmit() {
 
         <div class="flex justify-end gap-3">
             <Button as-child variant="outline">
-                <Link :href="index()">Annuler</Link>
+                <Link :href="index()">{{ t('accounts.form.cancel') }}</Link>
             </Button>
             <Button type="submit" :disabled="form.processing">
-                {{ submitLabel }}
+                {{ submitLabel ?? t('accounts.form.save') }}
             </Button>
         </div>
     </form>

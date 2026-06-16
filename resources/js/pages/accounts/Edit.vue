@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import type { useForm } from '@inertiajs/vue3';
 import { Head } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import { update } from '@/actions/App/Http/Controllers/AccountController';
 import AccountForm from '@/components/AccountForm.vue';
 
 import type { Account } from '@/types';
+
+const { t } = useI18n();
 
 const props = defineProps<{ account: Account }>();
 
@@ -14,10 +17,10 @@ function handleSubmit(form: ReturnType<typeof useForm>) {
 </script>
 
 <template>
-    <Head title="Modifier le compte" />
+    <Head :title="t('accounts.edit.title')" />
 
     <div class="mx-auto max-w-lg space-y-6 p-4 md:p-6">
-        <h1 class="text-2xl font-bold">Modifier le compte</h1>
+        <h1 class="text-2xl font-bold">{{ t('accounts.edit.title') }}</h1>
         <AccountForm
             :account="{
                 ...account,
@@ -25,7 +28,7 @@ function handleSubmit(form: ReturnType<typeof useForm>) {
                 color: account.color ?? '',
                 icon: account.icon ?? '',
             }"
-            submit-label="Enregistrer les modifications"
+            :submit-label="t('accounts.edit.submit')"
             lock-initial-balance
             :on-submit="handleSubmit"
         />
