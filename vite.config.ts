@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
 import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
     plugins: [
@@ -31,4 +31,12 @@ export default defineConfig({
             formVariants: true,
         }),
     ],
+    test: {
+        environment: 'jsdom',
+        resolve: {
+            alias: {
+                '@': '/resources/js',
+            },
+        },
+    },
 });
