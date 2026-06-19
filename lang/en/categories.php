@@ -1,0 +1,36 @@
+<?php
+
+return [
+    'index' => [
+        'title' => 'Categories',
+        'new' => 'New category',
+        'empty' => 'No categories.',
+        'columns' => [
+            'name' => 'Name',
+            'color' => 'Color',
+        ],
+    ],
+    'create' => [
+        'title' => 'New category',
+        'submit' => 'Create category',
+    ],
+    'edit' => [
+        'title' => 'Edit category',
+        'submit' => 'Save changes',
+    ],
+    'form' => [
+        'name' => 'Name',
+        'namePlaceholder' => 'e.g. Groceries',
+        'color' => 'Color',
+        'colorOptional' => '(optional)',
+        'colorPick' => 'Pick a color',
+        'colorClear' => 'Remove',
+        'cancel' => 'Cancel',
+        'save' => 'Save',
+    ],
+    'flash' => [
+        'created' => 'Category created.',
+        'updated' => 'Category updated.',
+        'deleted' => 'Category deleted.',
+    ],
+];

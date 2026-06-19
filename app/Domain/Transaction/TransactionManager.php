@@ -16,10 +16,12 @@ class TransactionManager
         int $amountCents,
         string $label,
         CarbonImmutable $transactedAt,
+        ?int $categoryId = null,
     ): Transaction {
         return Transaction::create([
             'user_id' => $user->id,
             'account_id' => $accountId,
+            'category_id' => $categoryId,
             'type' => $type,
             'amount_cents' => $amountCents,
             'label' => $label,
@@ -33,9 +35,11 @@ class TransactionManager
         int $amountCents,
         string $label,
         CarbonImmutable $transactedAt,
+        ?int $categoryId = null,
     ): void {
         $transaction->update([
             'account_id' => $accountId,
+            'category_id' => $categoryId,
             'amount_cents' => $amountCents,
             'label' => $label,
             'transacted_at' => $transactedAt,

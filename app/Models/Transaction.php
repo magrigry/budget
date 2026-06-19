@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $id
  * @property int $user_id
  * @property int $account_id
+ * @property int|null $category_id
  * @property TransactionType $type
  * @property int $amount_cents
  * @property string $label
@@ -24,6 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property CarbonImmutable|null $updated_at
  * @property-read User $user
  * @property-read Account $account
+ * @property-read Category|null $category
  *
  * @method static \Database\Factories\TransactionFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Transaction newModelQuery()
@@ -42,10 +44,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Transaction whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Transaction withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Transaction withoutTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Transaction whereCategoryId($value)
  *
  * @mixin \Eloquent
  */
-#[Fillable(['user_id', 'account_id', 'type', 'amount_cents', 'label', 'transacted_at'])]
+#[Fillable(['user_id', 'account_id', 'category_id', 'type', 'amount_cents', 'label', 'transacted_at'])]
 class Transaction extends Model
 {
     /** @use HasFactory<TransactionFactory> */
@@ -61,6 +64,12 @@ class Transaction extends Model
     public function account(): BelongsTo
     {
         return $this->belongsTo(Account::class);
+    }
+
+    /** @return BelongsTo<Category, $this> */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 
     protected function casts(): array

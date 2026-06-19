@@ -28,6 +28,7 @@ type GroupBy = 'none' | 'day' | 'week' | 'month' | 'year';
 
 interface Filters {
     account_id: number | null;
+    category_id: number | null;
     type: string | null;
     date_from: string | null;
     date_to: string | null;
@@ -64,6 +65,7 @@ interface PaginatedTransactions {
 const props = defineProps<{
     transactions: PaginatedTransactions;
     accounts: App.Data.Account[];
+    categories: App.Data.Category[];
     filters: Filters;
     totals: Record<string, PeriodTotal>;
 }>();
@@ -245,6 +247,25 @@ function isNewPeriod(idx: number): boolean {
 
             <select
                 class="h-8 rounded-md border border-input bg-background px-2 text-sm"
+                :value="filters.category_id ?? ''"
+                @change="
+                    applyFilter({
+                        category_id: ($event.target as HTMLSelectElement).value
+                            ? Number(($event.target as HTMLSelectElement).value)
+                            : null,
+                    })
+                "
+            >
+                <option value="">
+                    {{ t('transactions.index.filters.allCategories') }}
+                </option>
+                <option v-for="c in categories" :key="c.id" :value="c.id">
+                    {{ c.name }}
+                </option>
+            </select>
+
+            <select
+                class="h-8 rounded-md border border-input bg-background px-2 text-sm"
                 :value="filters.type ?? ''"
                 @change="
                     applyFilter({
@@ -357,6 +378,11 @@ function isNewPeriod(idx: number): boolean {
                             {{ t('transactions.index.columns.label') }}
                         </th>
                         <th
+                            class="hidden px-4 py-2 text-left font-medium lg:table-cell"
+                        >
+                            {{ t('transactions.index.columns.category') }}
+                        </th>
+                        <th
                             class="hidden px-4 py-2 text-left font-medium md:table-cell"
                         >
                             {{ t('transactions.index.columns.account') }}
@@ -402,7 +428,7 @@ function isNewPeriod(idx: number): boolean {
                             class="border-b bg-muted/70"
                         >
                             <td
-                                colspan="4"
+                                colspan="5"
                                 class="px-4 py-1.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase"
                             >
                                 {{ periodLabel(periodKey(item.transacted_at)) }}
@@ -480,6 +506,40 @@ function isNewPeriod(idx: number): boolean {
                             <td class="px-4 py-2 font-medium">
                                 {{ item.label }}
                             </td>
+                            <td class="hidden px-4 py-2 lg:table-cell">
+                                <span
+                                    v-if="item.category"
+                                    class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
+                                    :style="
+                                        item.category.color
+                                            ? {
+                                                  backgroundColor:
+                                                      item.category.color +
+                                                      '22',
+                                                  color: item.category.color,
+                                              }
+                                            : {}
+                                    "
+                                    :class="
+                                        !item.category.color
+                                            ? 'bg-muted text-muted-foreground'
+                                            : ''
+                                    "
+                                >
+                                    <span
+                                        v-if="item.category.color"
+                                        class="size-1.5 rounded-full"
+                                        :style="{
+                                            backgroundColor:
+                                                item.category.color,
+                                        }"
+                                    />
+                                    {{ item.category.name }}
+                                </span>
+                                <span v-else class="text-muted-foreground"
+                                    >—</span
+                                >
+                            </td>
                             <td
                                 class="hidden px-4 py-2 text-muted-foreground md:table-cell"
                             >
@@ -546,7 +606,7 @@ function isNewPeriod(idx: number): boolean {
                     </template>
                     <tr v-if="transactions.items.length === 0">
                         <td
-                            colspan="6"
+                            colspan="7"
                             class="px-4 py-10 text-center text-muted-foreground"
                         >
                             {{ t('transactions.index.empty') }}

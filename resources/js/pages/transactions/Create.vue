@@ -5,11 +5,11 @@ import { useI18n } from 'vue-i18n';
 import { store } from '@/actions/App/Http/Controllers/Transaction/TransactionController';
 import TransactionForm from '@/components/TransactionForm.vue';
 
-
 const { t } = useI18n();
 
 const props = defineProps<{
     accounts: App.Data.Account[];
+    categories: App.Data.Category[];
 }>();
 
 function handleSubmit(form: ReturnType<typeof useForm>) {
@@ -24,6 +24,7 @@ function handleSubmit(form: ReturnType<typeof useForm>) {
         <h1 class="text-2xl font-bold">{{ t('transactions.create.title') }}</h1>
         <TransactionForm
             :accounts="props.accounts"
+            :categories="props.categories"
             :submit-label="t('transactions.create.submit')"
             :on-submit="handleSubmit"
         />

@@ -20,6 +20,7 @@ class IndexFiltersRequest extends FormRequest
     {
         return [
             'account_id' => ['nullable', 'integer'],
+            'category_id' => ['nullable', 'integer'],
             'type' => ['nullable', 'string', Rule::in(['income', 'expense'])],
             'date_from' => ['nullable', 'date'],
             'date_to' => ['nullable', 'date'],
@@ -33,6 +34,11 @@ class IndexFiltersRequest extends FormRequest
     public function accountId(): ?int
     {
         return $this->integer('account_id') ?: null;
+    }
+
+    public function categoryId(): ?int
+    {
+        return $this->integer('category_id') ?: null;
     }
 
     public function type(): ?string

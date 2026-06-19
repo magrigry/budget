@@ -14,7 +14,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/composables/useFormatCurrency';
 
-
 const { t } = useI18n();
 
 const props = defineProps<{

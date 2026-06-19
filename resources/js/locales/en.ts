@@ -8,6 +8,7 @@ export default {
             filters: {
                 account: 'Account',
                 allAccounts: 'All accounts',
+                allCategories: 'All categories',
                 type: 'Type',
                 allTypes: 'All types',
                 dateFrom: 'From',
@@ -18,6 +19,7 @@ export default {
             columns: {
                 date: 'Date',
                 label: 'Label',
+                category: 'Category',
                 account: 'Account',
                 type: 'Type',
                 amount: 'Amount',
@@ -77,10 +79,41 @@ export default {
             account: 'Account',
             fromAccount: 'From account',
             toAccount: 'To account',
+            category: 'Category',
             amount: 'Amount',
             label: 'Label',
             labelPlaceholder: 'e.g. Grocery shopping',
             date: 'Date',
+            cancel: 'Cancel',
+            save: 'Save',
+        },
+    },
+    categories: {
+        index: {
+            title: 'Categories',
+            new: 'New category',
+            empty: 'No categories.',
+            confirmDelete: 'Delete category "{name}"?',
+            columns: {
+                name: 'Name',
+                color: 'Color',
+            },
+        },
+        create: {
+            title: 'New category',
+            submit: 'Create category',
+        },
+        edit: {
+            title: 'Edit category',
+            submit: 'Save changes',
+        },
+        form: {
+            name: 'Name',
+            namePlaceholder: 'e.g. Groceries',
+            color: 'Color',
+            colorOptional: '(optional)',
+            colorPick: 'Pick a color',
+            colorClear: 'Remove',
             cancel: 'Cancel',
             save: 'Save',
         },

@@ -8,6 +8,7 @@ export default {
             filters: {
                 account: 'Compte',
                 allAccounts: 'Tous les comptes',
+                allCategories: 'Toutes les catégories',
                 type: 'Type',
                 allTypes: 'Tous les types',
                 dateFrom: 'Du',
@@ -18,6 +19,7 @@ export default {
             columns: {
                 date: 'Date',
                 label: 'Libellé',
+                category: 'Catégorie',
                 account: 'Compte',
                 type: 'Type',
                 amount: 'Montant',
@@ -77,10 +79,41 @@ export default {
             account: 'Compte',
             fromAccount: 'Compte source',
             toAccount: 'Compte destination',
+            category: 'Catégorie',
             amount: 'Montant',
             label: 'Libellé',
             labelPlaceholder: 'Ex : Courses',
             date: 'Date',
+            cancel: 'Annuler',
+            save: 'Enregistrer',
+        },
+    },
+    categories: {
+        index: {
+            title: 'Catégories',
+            new: 'Nouvelle catégorie',
+            empty: 'Aucune catégorie.',
+            confirmDelete: 'Supprimer la catégorie « {name} » ?',
+            columns: {
+                name: 'Nom',
+                color: 'Couleur',
+            },
+        },
+        create: {
+            title: 'Nouvelle catégorie',
+            submit: 'Créer la catégorie',
+        },
+        edit: {
+            title: 'Modifier la catégorie',
+            submit: 'Enregistrer les modifications',
+        },
+        form: {
+            name: 'Nom',
+            namePlaceholder: 'Ex : Alimentation',
+            color: 'Couleur',
+            colorOptional: '(optionnel)',
+            colorPick: 'Choisir une couleur',
+            colorClear: 'Retirer',
             cancel: 'Annuler',
             save: 'Enregistrer',
         },

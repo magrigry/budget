@@ -10,6 +10,7 @@ const { t } = useI18n();
 const props = defineProps<{
     transaction: App.Data.Transaction.Transaction;
     accounts: App.Data.Account[];
+    categories: App.Data.Category[];
 }>();
 
 function handleSubmit(form: ReturnType<typeof useForm>) {
@@ -24,6 +25,7 @@ function handleSubmit(form: ReturnType<typeof useForm>) {
         <h1 class="text-2xl font-bold">{{ t('transactions.edit.title') }}</h1>
         <TransactionForm
             :accounts="props.accounts"
+            :categories="props.categories"
             :transaction="transaction"
             :submit-label="t('transactions.edit.submit')"
             :on-submit="handleSubmit"

@@ -5,8 +5,6 @@ import { useI18n } from 'vue-i18n';
 import { update } from '@/actions/App/Http/Controllers/AccountController';
 import AccountForm from '@/components/AccountForm.vue';
 
-
-
 const { t } = useI18n();
 
 const props = defineProps<{ account: App.Data.Account }>();

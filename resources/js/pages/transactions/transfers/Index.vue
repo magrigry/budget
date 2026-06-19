@@ -61,11 +61,13 @@ let searchTimeout: ReturnType<typeof setTimeout>;
 function applyFilter(patch: Partial<Filters>) {
     const merged = { ...props.filters, ...patch };
     const params: Record<string, string | number> = {};
+
     for (const [k, v] of Object.entries(merged)) {
         if (v !== null && v !== undefined && v !== '') {
             params[k] = v as string | number;
         }
     }
+
     router.get(index(), params, { preserveScroll: true, replace: true });
 }
 
@@ -283,7 +285,9 @@ function deleteItem(item: App.Data.Transaction.Transfer) {
                                     as-child
                                 >
                                     <Link
-                                        :href="editTransfer({ transfer: item.id })"
+                                        :href="
+                                            editTransfer({ transfer: item.id })
+                                        "
                                     >
                                         <Pencil class="size-3.5" />
                                     </Link>

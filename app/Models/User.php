@@ -33,6 +33,8 @@ use Laravel\Passkeys\Passkey;
  * @property CarbonImmutable|null $two_factor_confirmed_at
  * @property-read Collection<int, Account> $accounts
  * @property-read int|null $accounts_count
+ * @property-read Collection<int, Category> $categories
+ * @property-read int|null $categories_count
  * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
  * @property-read Collection<int, Passkey> $passkeys
@@ -69,6 +71,12 @@ class User extends Authenticatable implements PasskeyUser
     public function accounts(): HasMany
     {
         return $this->hasMany(Account::class)->withTrashed();
+    }
+
+    /** @return HasMany<Category, $this> */
+    public function categories(): HasMany
+    {
+        return $this->hasMany(Category::class);
     }
 
     protected function casts(): array

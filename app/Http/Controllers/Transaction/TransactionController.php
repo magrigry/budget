@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Transaction;
 
 use App\Data\AccountData;
+use App\Data\CategoryData;
 use App\Data\Transaction\TransactionData;
 use App\Domain\Transaction\TransactionManager;
 use App\Enums\TransactionType;
@@ -27,7 +28,7 @@ class TransactionController extends Controller
         $this->authorize('viewAny', Transaction::class);
 
         $entries = $this->baseQuery($request)
-            ->with('account')
+            ->with('account', 'category')
             ->orderBy($request->sortBy(), $request->sortDir())
             ->paginate(25);
 
@@ -45,6 +46,7 @@ class TransactionController extends Controller
                     fn (Transaction $t) => TransactionData::from([
                         ...$t->toArray(),
                         'account' => AccountData::fromModel($t->account),
+                        'category' => $t->category ? CategoryData::fromModel($t->category) : null,
                     ])
                 ),
                 'meta' => [
@@ -57,7 +59,8 @@ class TransactionController extends Controller
                 ],
             ],
             'accounts' => $accounts,
-            'filters' => [...$request->toFilters(), 'type' => $request->type()],
+            'categories' => $this->categoryList(),
+            'filters' => [...$request->toFilters(), 'type' => $request->type(), 'category_id' => $request->categoryId()],
             'totals' => $totals,
         ]);
     }
@@ -71,7 +74,8 @@ class TransactionController extends Controller
             ->when($request->type(), fn ($q) => $q->where('type', $request->type()))
             ->when($request->dateFrom(), fn ($q) => $q->whereDate('transacted_at', '>=', $request->dateFrom()))
             ->when($request->dateTo(), fn ($q) => $q->whereDate('transacted_at', '<=', $request->dateTo()))
-            ->when($request->search(), fn ($q) => $q->where('label', 'like', "%{$request->search()}%"));
+            ->when($request->search(), fn ($q) => $q->where('label', 'like', "%{$request->search()}%"))
+            ->when($request->categoryId(), fn ($q) => $q->where('category_id', $request->categoryId()));
     }
 
     /** @return array<string, array{income: int, expense: int, net: int}> */
@@ -108,6 +112,7 @@ class TransactionController extends Controller
 
         return Inertia::render('transactions/Create', [
             'accounts' => $this->accountList(),
+            'categories' => $this->categoryList(),
         ]);
     }
 
@@ -124,6 +129,7 @@ class TransactionController extends Controller
             $validated['amount_cents'],
             $validated['label'],
             CarbonImmutable::parse($validated['transacted_at']),
+            $validated['category_id'] ?? null,
         );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('transactions.flash.created')]);
@@ -135,14 +141,16 @@ class TransactionController extends Controller
     {
         $this->authorize('update', $transaction);
 
-        $transaction->load('account');
+        $transaction->load('account', 'category');
 
         return Inertia::render('transactions/Edit', [
             'transaction' => TransactionData::from([
                 ...$transaction->toArray(),
                 'account' => AccountData::fromModel($transaction->account),
+                'category' => $transaction->category ? CategoryData::fromModel($transaction->category) : null,
             ]),
             'accounts' => $this->accountList(),
+            'categories' => $this->categoryList(),
         ]);
     }
 
@@ -158,6 +166,7 @@ class TransactionController extends Controller
             $validated['amount_cents'],
             $validated['label'],
             CarbonImmutable::parse($validated['transacted_at']),
+            $validated['category_id'] ?? null,
         );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('transactions.flash.updated')]);

@@ -5,7 +5,6 @@ import { useI18n } from 'vue-i18n';
 import { store } from '@/actions/App/Http/Controllers/Transaction/TransferController';
 import TransferForm from '@/components/TransferForm.vue';
 
-
 const { t } = useI18n();
 
 const props = defineProps<{

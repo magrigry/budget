@@ -6,7 +6,6 @@ import { edit } from '@/actions/App/Http/Controllers/AccountController';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/composables/useFormatCurrency';
 
-
 const { t } = useI18n();
 
 defineProps<{ account: App.Data.Account }>();

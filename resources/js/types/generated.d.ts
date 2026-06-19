@@ -10,15 +10,22 @@ declare namespace App {
             readonly icon: string | null;
             readonly archived: boolean;
         };
+        export type Category = {
+            readonly id: number;
+            readonly name: string;
+            readonly color: string | null;
+        };
         namespace Transaction {
             export type Transaction = {
                 readonly id: number;
                 readonly account_id: number;
+                readonly category_id: number | null;
                 readonly type: App.Enums.TransactionType;
                 readonly amount_cents: number;
                 readonly label: string;
                 readonly transacted_at: string;
                 readonly account: App.Data.Account;
+                readonly category: App.Data.Category | null;
             };
             export type Transfer = {
                 readonly id: number;

@@ -12,6 +12,7 @@ const { t } = useI18n();
 interface FormFields {
     type: App.Enums.TransactionType;
     account_id: number | '';
+    category_id: number | null;
     amount: number;
     label: string;
     transacted_at: string;
@@ -20,6 +21,7 @@ interface FormFields {
 const props = withDefaults(
     defineProps<{
         accounts: App.Data.Account[];
+        categories: App.Data.Category[];
         transaction?: App.Data.Transaction.Transaction;
         submitLabel?: string;
         onSubmit: (form: ReturnType<typeof useForm<FormFields>>) => void;
@@ -32,19 +34,22 @@ const today = new Date().toISOString().slice(0, 10);
 const form = useForm<FormFields>({
     type: props.transaction?.type ?? 'expense',
     account_id: props.transaction?.account_id ?? '',
+    category_id: props.transaction?.category_id ?? null,
     amount: props.transaction ? props.transaction.amount_cents / 100 : 0,
     label: props.transaction?.label ?? '',
     transacted_at: props.transaction?.transacted_at ?? today,
 });
 
+form.transform((data) => ({
+    type: data.type,
+    account_id: data.account_id,
+    category_id: data.category_id || null,
+    amount_cents: Math.round(data.amount * 100),
+    label: data.label,
+    transacted_at: data.transacted_at,
+}));
+
 function handleSubmit() {
-    form.transform((data) => ({
-        type: data.type,
-        account_id: data.account_id,
-        amount_cents: Math.round(data.amount * 100),
-        label: data.label,
-        transacted_at: data.transacted_at,
-    }));
     props.onSubmit(form);
 }
 </script>
@@ -120,6 +125,24 @@ function handleSubmit() {
                 />
                 <InputError :message="form.errors.transacted_at" />
             </div>
+        </div>
+
+        <!-- Category -->
+        <div class="space-y-2">
+            <Label for="category_id">{{
+                t('transactions.form.category')
+            }}</Label>
+            <select
+                id="category_id"
+                v-model="form.category_id"
+                class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+            >
+                <option :value="null">—</option>
+                <option v-for="c in categories" :key="c.id" :value="c.id">
+                    {{ c.name }}
+                </option>
+            </select>
+            <InputError :message="form.errors.category_id" />
         </div>
 
         <!-- Label -->
