@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Data\AccountData;
 use App\Domain\Account\AccountManager;
 use App\Http\Requests\StoreAccountRequest;
 use App\Http\Requests\UpdateAccountRequest;
@@ -25,16 +26,7 @@ class AccountController extends Controller
             ->when($showArchived, fn (Builder $q) => $q->withTrashed())
             ->orderBy('name')
             ->get()
-            ->map(fn (Account $account) => [
-                'id' => $account->id,
-                'name' => $account->name,
-                'currency' => $account->currency,
-                'initial_balance_cents' => $account->initial_balance_cents,
-                'balance_cents' => $account->balance_cents,
-                'color' => $account->color,
-                'icon' => $account->icon,
-                'archived' => $account->trashed(),
-            ]);
+            ->map(fn (Account $account) => AccountData::fromModel($account));
 
         return Inertia::render('accounts/Index', [
             'accounts' => $accounts,
@@ -74,15 +66,7 @@ class AccountController extends Controller
         $this->authorize('view', $account);
 
         return Inertia::render('accounts/Show', [
-            'account' => [
-                'id' => $account->id,
-                'name' => $account->name,
-                'currency' => $account->currency,
-                'initial_balance_cents' => $account->initial_balance_cents,
-                'balance_cents' => $account->balance_cents,
-                'color' => $account->color,
-                'icon' => $account->icon,
-            ],
+            'account' => AccountData::fromModel($account),
         ]);
     }
 
@@ -91,14 +75,7 @@ class AccountController extends Controller
         $this->authorize('update', $account);
 
         return Inertia::render('accounts/Edit', [
-            'account' => [
-                'id' => $account->id,
-                'name' => $account->name,
-                'currency' => $account->currency,
-                'initial_balance_cents' => $account->initial_balance_cents,
-                'color' => $account->color,
-                'icon' => $account->icon,
-            ],
+            'account' => AccountData::fromModel($account),
         ]);
     }
 

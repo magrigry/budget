@@ -2,6 +2,7 @@
 import { Link } from '@inertiajs/vue3';
 import { ArrowLeftRight, LayoutGrid, Settings, Tag, Wallet } from '@lucide/vue';
 import { index as accountsIndex } from '@/actions/App/Http/Controllers/AccountController';
+import { index as transactionsIndex } from '@/actions/App/Http/Controllers/Transaction/TransactionController';
 import AppLogo from '@/components/AppLogo.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -25,7 +26,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Transactions',
-        href: { url: '/transactions', method: 'get' },
+        href: transactionsIndex(),
         icon: ArrowLeftRight,
     },
     {

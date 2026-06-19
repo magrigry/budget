@@ -2,6 +2,7 @@
 import { Link } from '@inertiajs/vue3';
 import { ArrowLeftRight, Settings, Tag, Wallet } from '@lucide/vue';
 import { index as accountsIndex } from '@/actions/App/Http/Controllers/AccountController';
+import { index as transactionsIndex } from '@/actions/App/Http/Controllers/Transaction/TransactionController';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import type { NavItem } from '@/types';
 
@@ -10,7 +11,7 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
 const navItems: NavItem[] = [
     {
         title: 'Transactions',
-        href: { url: '/transactions', method: 'get' },
+        href: transactionsIndex(),
         icon: ArrowLeftRight,
     },
     {

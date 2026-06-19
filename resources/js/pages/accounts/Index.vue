@@ -13,12 +13,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/composables/useFormatCurrency';
-import type { Account } from '@/types';
+
 
 const { t } = useI18n();
 
 const props = defineProps<{
-    accounts: Account[];
+    accounts: App.Data.Account[];
     showArchived: boolean;
 }>();
 
@@ -43,7 +43,7 @@ function restoreAccount(id: number) {
     <Head :title="t('accounts.index.title')" />
 
     <div class="space-y-6 p-4 md:p-6">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-wrap items-center justify-between gap-2">
             <h1 class="text-2xl font-bold">{{ t('accounts.index.title') }}</h1>
             <div class="flex gap-2">
                 <Button variant="outline" size="sm" @click="toggleArchived">

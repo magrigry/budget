@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Enums\TransactionType;
 use Carbon\CarbonImmutable;
 use Database\Factories\AccountFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -42,6 +45,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Account withTrashed(bool $withTrashed = true)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Account withoutTrashed()
  *
+ * @property-read Collection<int, Transaction> $transactions
+ * @property-read int|null $transactions_count
+ *
  * @mixin \Eloquent
  */
 #[Fillable(['name', 'currency', 'initial_balance_cents', 'color', 'icon'])]
@@ -56,13 +62,25 @@ class Account extends Model
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Balance in cents = initial_balance_cents + sum of all transaction amounts_cents.
-     * Transaction sum will be added when the transactions table exists.
-     */
+    /** @return HasMany<Transaction, $this> */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
     public function getBalanceCentsAttribute(): int
     {
-        return $this->initial_balance_cents;
+        $txAdjustment = $this->transactions()
+            ->selectRaw(
+                'SUM(CASE WHEN type = ? THEN amount_cents ELSE -amount_cents END) as adjustment',
+                [TransactionType::Income->value],
+            )
+            ->value('adjustment') ?? 0;
+
+        $transferOut = Transfer::where('from_account_id', $this->id)->sum('amount_cents');
+        $transferIn = Transfer::where('to_account_id', $this->id)->sum('amount_cents');
+
+        return $this->initial_balance_cents + (int) $txAdjustment - (int) $transferOut + (int) $transferIn;
     }
 
     protected function casts(): array

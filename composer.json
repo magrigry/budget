@@ -15,7 +15,9 @@
         "laravel/fortify": "^1.37.2",
         "laravel/framework": "^13.7",
         "laravel/tinker": "^3.0",
-        "laravel/wayfinder": "^0.1.14"
+        "laravel/wayfinder": "^0.1.14",
+        "spatie/laravel-data": "^4.23",
+        "spatie/laravel-typescript-transformer": "^3.2"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.7",
@@ -28,6 +30,7 @@
         "laravel/sail": "^1.53",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.9.3",
+        "phpmd/phpmd": "^2.5",
         "phpunit/phpunit": "^12.5.23"
     },
     "autoload": {
@@ -71,7 +74,9 @@
         "types:check": [
             "@php artisan ide-helper:models --write --ansi",
             "pint app/Models/ --quiet",
-            "phpstan analyse --memory-limit=512M"
+            "@php artisan typescript:transform",
+            "phpstan analyse --memory-limit=512M",
+            "npm run types:check"
         ],
         "test": [
             "@php artisan config:clear --ansi",

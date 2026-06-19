@@ -5,11 +5,11 @@ import { useI18n } from 'vue-i18n';
 import { update } from '@/actions/App/Http/Controllers/AccountController';
 import AccountForm from '@/components/AccountForm.vue';
 
-import type { Account } from '@/types';
+
 
 const { t } = useI18n();
 
-const props = defineProps<{ account: Account }>();
+const props = defineProps<{ account: App.Data.Account }>();
 
 function handleSubmit(form: ReturnType<typeof useForm>) {
     form.patch(update.url({ account: props.account.id }));

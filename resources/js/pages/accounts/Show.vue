@@ -5,11 +5,11 @@ import { useI18n } from 'vue-i18n';
 import { edit } from '@/actions/App/Http/Controllers/AccountController';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/composables/useFormatCurrency';
-import type { Account } from '@/types';
+
 
 const { t } = useI18n();
 
-defineProps<{ account: Account }>();
+defineProps<{ account: App.Data.Account }>();
 </script>
 
 <template>

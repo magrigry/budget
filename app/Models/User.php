@@ -63,10 +63,12 @@ class User extends Authenticatable implements PasskeyUser
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
+    protected $with = ['accounts'];
+
     /** @return HasMany<Account, $this> */
     public function accounts(): HasMany
     {
-        return $this->hasMany(Account::class);
+        return $this->hasMany(Account::class)->withTrashed();
     }
 
     protected function casts(): array

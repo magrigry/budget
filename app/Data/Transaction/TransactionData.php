@@ -1,0 +1,22 @@
+<?php
+
+namespace App\Data\Transaction;
+
+use App\Data\AccountData;
+use App\Enums\TransactionType;
+use Spatie\LaravelData\Data;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
+
+#[TypeScript('Transaction')]
+class TransactionData extends Data
+{
+    public function __construct(
+        public readonly int $id,
+        public readonly int $account_id,
+        public readonly TransactionType $type,
+        public readonly int $amount_cents,
+        public readonly string $label,
+        public readonly string $transacted_at,
+        public readonly AccountData $account,
+    ) {}
+}
