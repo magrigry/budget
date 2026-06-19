@@ -183,8 +183,54 @@ function deleteItem(item: App.Data.Transaction.Transfer) {
             </Button>
         </div>
 
-        <!-- Table -->
-        <div class="overflow-x-auto rounded-md border">
+        <!-- Mobile cards -->
+        <div class="md:hidden rounded-md border divide-y text-sm">
+            <div
+                v-for="item in transfers.items"
+                :key="item.id"
+                class="px-3 py-2 hover:bg-muted/30"
+            >
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0 flex-1">
+                        <div class="font-medium truncate">{{ item.label }}</div>
+                        <div class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                            <span class="tabular-nums">{{ formatDate(item.transacted_at) }}</span>
+                            <span
+                                :class="filters.account_id === item.from_account.id ? 'font-semibold text-foreground' : ''"
+                            >{{ item.from_account.name }}</span>
+                            <ArrowRight class="size-3 shrink-0" />
+                            <span
+                                :class="filters.account_id === item.to_account.id ? 'font-semibold text-foreground' : ''"
+                            >{{ item.to_account.name }}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <span class="tabular-nums text-muted-foreground">{{ item.amount_cents / 100 }}</span>
+                        <div class="flex flex-col gap-0.5">
+                            <Button variant="ghost" size="icon" class="size-7" as-child>
+                                <Link :href="editTransfer({ transfer: item.id })">
+                                    <Pencil class="size-3.5" />
+                                </Link>
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                class="size-7 text-muted-foreground hover:text-destructive"
+                                @click="deleteItem(item)"
+                            >
+                                <Trash2 class="size-3.5" />
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-if="transfers.items.length === 0" class="px-4 py-10 text-center text-muted-foreground">
+                {{ t('transactions.transfers.index.empty') }}
+            </div>
+        </div>
+
+        <!-- Desktop table -->
+        <div class="hidden md:block rounded-md border">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b bg-muted/50">
@@ -195,16 +241,11 @@ function deleteItem(item: App.Data.Transaction.Transfer) {
                             <span class="flex items-center gap-1">
                                 {{ t('transactions.index.columns.date') }}
                                 <ArrowDown
-                                    v-if="
-                                        filters.sort_by === 'transacted_at' &&
-                                        filters.sort_dir === 'desc'
-                                    "
+                                    v-if="filters.sort_by === 'transacted_at' && filters.sort_dir === 'desc'"
                                     class="size-3"
                                 />
                                 <ArrowUp
-                                    v-else-if="
-                                        filters.sort_by === 'transacted_at'
-                                    "
+                                    v-else-if="filters.sort_by === 'transacted_at'"
                                     class="size-3"
                                 />
                                 <ArrowUpDown v-else class="size-3 opacity-40" />
@@ -213,14 +254,10 @@ function deleteItem(item: App.Data.Transaction.Transfer) {
                         <th class="px-4 py-2 text-left font-medium">
                             {{ t('transactions.index.columns.label') }}
                         </th>
-                        <th
-                            class="hidden px-4 py-2 text-left font-medium md:table-cell"
-                        >
+                        <th class="px-4 py-2 text-left font-medium">
                             {{ t('transactions.transfers.index.columns.from') }}
                         </th>
-                        <th
-                            class="hidden px-4 py-2 text-left font-medium md:table-cell"
-                        >
+                        <th class="px-4 py-2 text-left font-medium">
                             {{ t('transactions.transfers.index.columns.to') }}
                         </th>
                         <th
@@ -230,16 +267,11 @@ function deleteItem(item: App.Data.Transaction.Transfer) {
                             <span class="flex items-center justify-end gap-1">
                                 {{ t('transactions.index.columns.amount') }}
                                 <ArrowDown
-                                    v-if="
-                                        filters.sort_by === 'amount_cents' &&
-                                        filters.sort_dir === 'desc'
-                                    "
+                                    v-if="filters.sort_by === 'amount_cents' && filters.sort_dir === 'desc'"
                                     class="size-3"
                                 />
                                 <ArrowUp
-                                    v-else-if="
-                                        filters.sort_by === 'amount_cents'
-                                    "
+                                    v-else-if="filters.sort_by === 'amount_cents'"
                                     class="size-3"
                                 />
                                 <ArrowUpDown v-else class="size-3 opacity-40" />
@@ -254,53 +286,32 @@ function deleteItem(item: App.Data.Transaction.Transfer) {
                         :key="item.id"
                         class="border-b last:border-0 hover:bg-muted/30"
                     >
-                        <td
-                            class="px-4 py-2 text-muted-foreground tabular-nums"
-                        >
+                        <td class="px-4 py-2 text-muted-foreground tabular-nums">
                             {{ formatDate(item.transacted_at) }}
                         </td>
                         <td class="px-4 py-2 font-medium">{{ item.label }}</td>
                         <td
-                            class="hidden px-4 py-2 md:table-cell"
-                            :class="
-                                filters.account_id === item.from_account.id
-                                    ? 'font-semibold text-foreground'
-                                    : 'text-muted-foreground'
-                            "
+                            class="px-4 py-2"
+                            :class="filters.account_id === item.from_account.id ? 'font-semibold text-foreground' : 'text-muted-foreground'"
                         >
                             {{ item.from_account.name }}
                         </td>
-                        <td class="hidden px-4 py-2 md:table-cell">
+                        <td class="px-4 py-2">
                             <span
                                 class="flex items-center gap-1"
-                                :class="
-                                    filters.account_id === item.to_account.id
-                                        ? 'font-semibold text-foreground'
-                                        : 'text-muted-foreground'
-                                "
+                                :class="filters.account_id === item.to_account.id ? 'font-semibold text-foreground' : 'text-muted-foreground'"
                             >
                                 <ArrowRight class="size-3" />
                                 {{ item.to_account.name }}
                             </span>
                         </td>
-                        <td
-                            class="px-4 py-2 text-right text-muted-foreground tabular-nums"
-                        >
+                        <td class="px-4 py-2 text-right text-muted-foreground tabular-nums">
                             {{ item.amount_cents / 100 }}
                         </td>
                         <td class="px-4 py-2">
                             <div class="flex justify-end gap-1">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    class="size-7"
-                                    as-child
-                                >
-                                    <Link
-                                        :href="
-                                            editTransfer({ transfer: item.id })
-                                        "
-                                    >
+                                <Button variant="ghost" size="icon" class="size-7" as-child>
+                                    <Link :href="editTransfer({ transfer: item.id })">
                                         <Pencil class="size-3.5" />
                                     </Link>
                                 </Button>
@@ -316,10 +327,7 @@ function deleteItem(item: App.Data.Transaction.Transfer) {
                         </td>
                     </tr>
                     <tr v-if="transfers.items.length === 0">
-                        <td
-                            colspan="6"
-                            class="px-4 py-10 text-center text-muted-foreground"
-                        >
+                        <td colspan="6" class="px-4 py-10 text-center text-muted-foreground">
                             {{ t('transactions.transfers.index.empty') }}
                         </td>
                     </tr>
