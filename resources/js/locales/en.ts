@@ -28,6 +28,14 @@ export default {
                 expense: 'Expense',
                 transfer: 'Transfer',
             },
+            groupBy: {
+                none: 'Group by…',
+                day: 'Day',
+                week: 'Week',
+                month: 'Month',
+                year: 'Year',
+                weekLabel: 'Week',
+            },
             sort: {
                 date: 'Date',
                 amount: 'Amount',

@@ -18,9 +18,13 @@ import {
 import { index as transfersIndex } from '@/actions/App/Http/Controllers/Transaction/TransferController';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useBrowserLocale } from '@/composables/useBrowserLocale';
 import { formatDate } from '@/composables/useFormatDate';
 
 const { t } = useI18n();
+const locale = useBrowserLocale();
+
+type GroupBy = 'none' | 'day' | 'week' | 'month' | 'year';
 
 interface Filters {
     account_id: number | null;
@@ -30,6 +34,13 @@ interface Filters {
     search: string | null;
     sort_by: string;
     sort_dir: string;
+    group_by: GroupBy;
+}
+
+interface PeriodTotal {
+    income: number;
+    expense: number;
+    net: number;
 }
 
 interface PaginationLink {
@@ -54,6 +65,7 @@ const props = defineProps<{
     transactions: PaginatedTransactions;
     accounts: App.Data.Account[];
     filters: Filters;
+    totals: Record<string, PeriodTotal>;
 }>();
 
 let searchTimeout: ReturnType<typeof setTimeout>;
@@ -61,11 +73,13 @@ let searchTimeout: ReturnType<typeof setTimeout>;
 function applyFilter(patch: Partial<Filters>) {
     const merged = { ...props.filters, ...patch };
     const params: Record<string, string | number> = {};
+
     for (const [k, v] of Object.entries(merged)) {
         if (v !== null && v !== undefined && v !== '') {
             params[k] = v as string | number;
         }
     }
+
     router.get(index(), params, { preserveScroll: true, replace: true });
 }
 
@@ -94,6 +108,93 @@ function deleteItem(item: App.Data.Transaction.Transaction) {
     }
 
     router.delete(destroyEntry({ transaction: item.id }));
+}
+
+// --- Grouping helpers ---
+
+function periodKey(date: string): string {
+    const groupBy = props.filters.group_by;
+
+    if (groupBy === 'none') {
+        return '';
+    }
+
+    if (groupBy === 'day') {
+        return date.substring(0, 10);
+    }
+
+    if (groupBy === 'year') {
+        return date.substring(0, 4);
+    }
+
+    if (groupBy === 'week') {
+        // Match SQLite strftime('%Y-%W', ...) — weeks start Monday, Jan 1 is week 00
+        const d = new Date(date + 'T12:00:00');
+        const jan1 = new Date(d.getFullYear(), 0, 1);
+        const jan1Day = (jan1.getDay() + 6) % 7; // Mon=0
+        const dayOfYear = Math.floor((d.getTime() - jan1.getTime()) / 86400000);
+        const week = Math.floor((dayOfYear + jan1Day) / 7);
+
+        return `${d.getFullYear()}-${String(week).padStart(2, '0')}`;
+    }
+
+    // month
+    return date.substring(0, 7);
+}
+
+function periodLabel(key: string): string {
+    const groupBy = props.filters.group_by;
+
+    if (groupBy === 'day') {
+        return formatDate(key);
+    }
+
+    if (groupBy === 'year') {
+        return key;
+    }
+
+    if (groupBy === 'week') {
+        const [year, week] = key.split('-');
+
+        return `${t('transactions.index.groupBy.weekLabel')} ${parseInt(week) + 1} — ${year}`;
+    }
+
+    // month: YYYY-MM
+    const [year, month] = key.split('-');
+
+    return new Intl.DateTimeFormat(locale, {
+        month: 'long',
+        year: 'numeric',
+    }).format(new Date(parseInt(year), parseInt(month) - 1, 1));
+}
+
+function formatAmount(cents: number, signed = false): string {
+    const value = cents / 100;
+    const formatted = new Intl.NumberFormat(locale, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(Math.abs(value));
+
+    if (signed) {
+        return value >= 0 ? `+${formatted}` : `−${formatted}`;
+    }
+
+    return formatted;
+}
+
+function isNewPeriod(idx: number): boolean {
+    if (props.filters.group_by === 'none') {
+        return false;
+    }
+
+    if (idx === 0) {
+        return true;
+    }
+
+    return (
+        periodKey(props.transactions.items[idx].transacted_at) !==
+        periodKey(props.transactions.items[idx - 1].transacted_at)
+    );
 }
 </script>
 
@@ -195,6 +296,31 @@ function deleteItem(item: App.Data.Transaction.Transaction) {
                 @input="onSearchInput"
             />
 
+            <select
+                class="h-8 rounded-md border border-input bg-background px-2 text-sm"
+                :value="filters.group_by"
+                @change="
+                    applyFilter({
+                        group_by: (($event.target as HTMLSelectElement).value ||
+                            'none') as GroupBy,
+                    })
+                "
+            >
+                <option
+                    v-for="opt in [
+                        'none',
+                        'day',
+                        'week',
+                        'month',
+                        'year',
+                    ] as GroupBy[]"
+                    :key="opt"
+                    :value="opt"
+                >
+                    {{ t(`transactions.index.groupBy.${opt}`) }}
+                </option>
+            </select>
+
             <Button variant="ghost" size="sm" class="h-8" @click="resetFilters">
                 {{ t('transactions.index.filters.reset') }}
             </Button>
@@ -266,70 +392,158 @@ function deleteItem(item: App.Data.Transaction.Transaction) {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr
-                        v-for="item in transactions.items"
+                    <template
+                        v-for="(item, idx) in transactions.items"
                         :key="item.id"
-                        class="border-b last:border-0 hover:bg-muted/30"
                     >
-                        <td
-                            class="px-4 py-2 text-muted-foreground tabular-nums"
+                        <!-- Period header row -->
+                        <tr
+                            v-if="isNewPeriod(idx)"
+                            class="border-b bg-muted/70"
                         >
-                            {{ formatDate(item.transacted_at) }}
-                        </td>
-                        <td class="px-4 py-2 font-medium">{{ item.label }}</td>
-                        <td
-                            class="hidden px-4 py-2 text-muted-foreground md:table-cell"
-                        >
-                            {{ item.account.name }}
-                        </td>
-                        <td class="hidden px-4 py-2 sm:table-cell">
-                            <span
-                                class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+                            <td
+                                colspan="4"
+                                class="px-4 py-1.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+                            >
+                                {{ periodLabel(periodKey(item.transacted_at)) }}
+                            </td>
+                            <td class="px-4 py-1.5 text-right tabular-nums">
+                                <span
+                                    class="flex items-center justify-end gap-3 text-xs font-semibold"
+                                >
+                                    <span
+                                        class="text-green-600 dark:text-green-400"
+                                    >
+                                        +{{
+                                            formatAmount(
+                                                totals[
+                                                    periodKey(
+                                                        item.transacted_at,
+                                                    )
+                                                ]?.income ?? 0,
+                                            )
+                                        }}
+                                    </span>
+                                    <span
+                                        class="text-red-600 dark:text-red-400"
+                                    >
+                                        −{{
+                                            formatAmount(
+                                                totals[
+                                                    periodKey(
+                                                        item.transacted_at,
+                                                    )
+                                                ]?.expense ?? 0,
+                                            )
+                                        }}
+                                    </span>
+                                    <span
+                                        :class="{
+                                            'text-green-600 dark:text-green-400':
+                                                (totals[
+                                                    periodKey(
+                                                        item.transacted_at,
+                                                    )
+                                                ]?.net ?? 0) >= 0,
+                                            'text-red-600 dark:text-red-400':
+                                                (totals[
+                                                    periodKey(
+                                                        item.transacted_at,
+                                                    )
+                                                ]?.net ?? 0) < 0,
+                                        }"
+                                    >
+                                        =
+                                        {{
+                                            formatAmount(
+                                                totals[
+                                                    periodKey(
+                                                        item.transacted_at,
+                                                    )
+                                                ]?.net ?? 0,
+                                                true,
+                                            )
+                                        }}
+                                    </span>
+                                </span>
+                            </td>
+                            <td class="px-4 py-1.5" />
+                        </tr>
+
+                        <!-- Transaction row -->
+                        <tr class="border-b last:border-0 hover:bg-muted/30">
+                            <td
+                                class="px-4 py-2 text-muted-foreground tabular-nums"
+                            >
+                                {{ formatDate(item.transacted_at) }}
+                            </td>
+                            <td class="px-4 py-2 font-medium">
+                                {{ item.label }}
+                            </td>
+                            <td
+                                class="hidden px-4 py-2 text-muted-foreground md:table-cell"
+                            >
+                                {{ item.account.name }}
+                            </td>
+                            <td class="hidden px-4 py-2 sm:table-cell">
+                                <span
+                                    class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+                                    :class="{
+                                        'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':
+                                            item.type === 'income',
+                                        'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400':
+                                            item.type === 'expense',
+                                    }"
+                                >
+                                    {{
+                                        t(
+                                            `transactions.index.types.${item.type}`,
+                                        )
+                                    }}
+                                </span>
+                            </td>
+                            <td
+                                class="px-4 py-2 text-right tabular-nums"
                                 :class="{
-                                    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':
+                                    'text-green-600 dark:text-green-400':
                                         item.type === 'income',
-                                    'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400':
+                                    'text-red-600 dark:text-red-400':
                                         item.type === 'expense',
                                 }"
                             >
-                                {{ t(`transactions.index.types.${item.type}`) }}
-                            </span>
-                        </td>
-                        <td
-                            class="px-4 py-2 text-right tabular-nums"
-                            :class="{
-                                'text-green-600 dark:text-green-400':
-                                    item.type === 'income',
-                                'text-red-600 dark:text-red-400':
-                                    item.type === 'expense',
-                            }"
-                        >
-                            {{ item.type === 'income' ? '+' : '−'
-                            }}{{ item.amount_cents / 100 }}
-                        </td>
-                        <td class="px-4 py-2">
-                            <div class="flex justify-end gap-1">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    class="size-7"
-                                    as-child
-                                >
-                                    <Link :href="editEntry({ transaction: item.id })">
-                                        <Pencil class="size-3.5" />
-                                    </Link>
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    class="size-7 text-muted-foreground hover:text-destructive"
-                                    @click="deleteItem(item)"
-                                >
-                                    <Trash2 class="size-3.5" />
-                                </Button>
-                            </div>
-                        </td>
-                    </tr>
+                                {{ item.type === 'income' ? '+' : '−'
+                                }}{{ formatAmount(item.amount_cents) }}
+                            </td>
+                            <td class="px-4 py-2">
+                                <div class="flex justify-end gap-1">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        class="size-7"
+                                        as-child
+                                    >
+                                        <Link
+                                            :href="
+                                                editEntry({
+                                                    transaction: item.id,
+                                                })
+                                            "
+                                        >
+                                            <Pencil class="size-3.5" />
+                                        </Link>
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        class="size-7 text-muted-foreground hover:text-destructive"
+                                        @click="deleteItem(item)"
+                                    >
+                                        <Trash2 class="size-3.5" />
+                                    </Button>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
                     <tr v-if="transactions.items.length === 0">
                         <td
                             colspan="6"

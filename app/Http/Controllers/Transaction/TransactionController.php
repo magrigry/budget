@@ -13,6 +13,7 @@ use App\Http\Requests\Transaction\UpdateTransactionRequest;
 use App\Models\Account;
 use App\Models\Transaction;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -25,14 +26,8 @@ class TransactionController extends Controller
     {
         $this->authorize('viewAny', Transaction::class);
 
-        $entries = Transaction::query()
+        $entries = $this->baseQuery($request)
             ->with('account')
-            ->where('user_id', $request->user()->id)
-            ->when($request->accountId(), fn ($q) => $q->where('account_id', $request->accountId()))
-            ->when($request->type(), fn ($q) => $q->where('type', $request->type()))
-            ->when($request->dateFrom(), fn ($q) => $q->whereDate('transacted_at', '>=', $request->dateFrom()))
-            ->when($request->dateTo(), fn ($q) => $q->whereDate('transacted_at', '<=', $request->dateTo()))
-            ->when($request->search(), fn ($q) => $q->where('label', 'like', "%{$request->search()}%"))
             ->orderBy($request->sortBy(), $request->sortDir())
             ->paginate(25);
 
@@ -41,6 +36,8 @@ class TransactionController extends Controller
             ->orderBy('name')
             ->get()
             ->map(fn (Account $a) => AccountData::fromModel($a));
+
+        $totals = $this->computeTotals($request);
 
         return Inertia::render('transactions/Index', [
             'transactions' => [
@@ -61,7 +58,48 @@ class TransactionController extends Controller
             ],
             'accounts' => $accounts,
             'filters' => [...$request->toFilters(), 'type' => $request->type()],
+            'totals' => $totals,
         ]);
+    }
+
+    /** @return Builder<Transaction> */
+    private function baseQuery(IndexFiltersRequest $request): Builder
+    {
+        return Transaction::query()
+            ->where('user_id', $request->user()->id)
+            ->when($request->accountId(), fn ($q) => $q->where('account_id', $request->accountId()))
+            ->when($request->type(), fn ($q) => $q->where('type', $request->type()))
+            ->when($request->dateFrom(), fn ($q) => $q->whereDate('transacted_at', '>=', $request->dateFrom()))
+            ->when($request->dateTo(), fn ($q) => $q->whereDate('transacted_at', '<=', $request->dateTo()))
+            ->when($request->search(), fn ($q) => $q->where('label', 'like', "%{$request->search()}%"));
+    }
+
+    /** @return array<string, array{income: int, expense: int, net: int}> */
+    private function computeTotals(IndexFiltersRequest $request): array
+    {
+        if ($request->groupBy() === 'none') {
+            return [];
+        }
+
+        $periodExpr = match ($request->groupBy()) {
+            'day' => "strftime('%Y-%m-%d', transacted_at)",
+            'week' => "strftime('%Y-%W', transacted_at)",
+            'year' => "strftime('%Y', transacted_at)",
+            default => "strftime('%Y-%m', transacted_at)",
+        };
+
+        return $this->baseQuery($request)
+            ->selectRaw("$periodExpr as period, type, SUM(amount_cents) as total")
+            ->groupBy('period', 'type')
+            ->orderBy('period', 'desc')
+            ->get()
+            ->groupBy('period')
+            ->map(fn ($rows) => [
+                'income' => (int) $rows->where('type', 'income')->sum('total'),
+                'expense' => (int) $rows->where('type', 'expense')->sum('total'),
+                'net' => (int) ($rows->where('type', 'income')->sum('total') - $rows->where('type', 'expense')->sum('total')),
+            ])
+            ->all();
     }
 
     public function create(): Response

@@ -26,6 +26,7 @@ class IndexFiltersRequest extends FormRequest
             'search' => ['nullable', 'string', 'max:100'],
             'sort_by' => ['nullable', 'string', Rule::in(['transacted_at', 'amount_cents'])],
             'sort_dir' => ['nullable', 'string', Rule::in(['asc', 'desc'])],
+            'group_by' => ['nullable', 'string', Rule::in(['none', 'day', 'week', 'month', 'year'])],
         ];
     }
 
@@ -65,6 +66,14 @@ class IndexFiltersRequest extends FormRequest
         return $this->string('sort_dir')->value() === 'asc' ? 'asc' : 'desc';
     }
 
+    /** @return 'none'|'day'|'week'|'month'|'year' */
+    public function groupBy(): string
+    {
+        $value = $this->string('group_by')->value();
+
+        return in_array($value, ['day', 'week', 'month', 'year'], true) ? $value : 'none';
+    }
+
     /** @return array<string, mixed> */
     public function toFilters(): array
     {
@@ -75,6 +84,7 @@ class IndexFiltersRequest extends FormRequest
             'search' => $this->search(),
             'sort_by' => $this->sortBy(),
             'sort_dir' => $this->sortDir(),
+            'group_by' => $this->groupBy(),
         ];
     }
 }

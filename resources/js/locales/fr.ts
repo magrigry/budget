@@ -28,6 +28,14 @@ export default {
                 expense: 'Dépense',
                 transfer: 'Virement',
             },
+            groupBy: {
+                none: 'Regrouper par…',
+                day: 'Jour',
+                week: 'Semaine',
+                month: 'Mois',
+                year: 'Année',
+                weekLabel: 'Semaine',
+            },
             sort: {
                 date: 'Date',
                 amount: 'Montant',
