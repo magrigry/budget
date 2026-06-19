@@ -224,4 +224,8 @@ Cette application est une **application de gestion de budget personnelle**. Elle
 
 - **Graphiques** : Chart.js via `vue-chartjs` (post-MVP — ne pas installer d'autre lib de graphiques).
 - **Responsive mobile-first** dès le MVP, en anticipation d'une PWA post-MVP.
+
+# Décisions architecturales
+
+Avant toute modification structurelle (schéma, modèles, sérialisation, routing), lire les ADRs dans `docs/adr/`. Ils documentent les décisions prises et les alternatives écartées.
 </application-context>
