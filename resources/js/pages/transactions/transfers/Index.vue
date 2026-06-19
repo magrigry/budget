@@ -68,6 +68,8 @@ function applyFilter(patch: Partial<Filters>) {
         }
     }
 
+    params['_f'] = 1;
+
     router.get(index(), params, { preserveScroll: true, replace: true });
 }
 
@@ -79,7 +81,7 @@ function onSearchInput(e: Event) {
 }
 
 function resetFilters() {
-    router.get(index(), {}, { preserveScroll: true });
+    router.get(index(), { reset: 1 }, { preserveScroll: true });
 }
 
 function toggleSort(column: 'transacted_at' | 'amount_cents') {
@@ -259,13 +261,23 @@ function deleteItem(item: App.Data.Transaction.Transfer) {
                         </td>
                         <td class="px-4 py-2 font-medium">{{ item.label }}</td>
                         <td
-                            class="hidden px-4 py-2 text-muted-foreground md:table-cell"
+                            class="hidden px-4 py-2 md:table-cell"
+                            :class="
+                                filters.account_id === item.from_account.id
+                                    ? 'font-semibold text-foreground'
+                                    : 'text-muted-foreground'
+                            "
                         >
                             {{ item.from_account.name }}
                         </td>
                         <td class="hidden px-4 py-2 md:table-cell">
                             <span
-                                class="flex items-center gap-1 text-muted-foreground"
+                                class="flex items-center gap-1"
+                                :class="
+                                    filters.account_id === item.to_account.id
+                                        ? 'font-semibold text-foreground'
+                                        : 'text-muted-foreground'
+                                "
                             >
                                 <ArrowRight class="size-3" />
                                 {{ item.to_account.name }}

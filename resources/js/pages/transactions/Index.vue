@@ -82,6 +82,8 @@ function applyFilter(patch: Partial<Filters>) {
         }
     }
 
+    params['_f'] = 1;
+
     router.get(index(), params, { preserveScroll: true, replace: true });
 }
 
@@ -93,7 +95,7 @@ function onSearchInput(e: Event) {
 }
 
 function resetFilters() {
-    router.get(index(), {}, { preserveScroll: true });
+    router.get(index(), { reset: 1 }, { preserveScroll: true });
 }
 
 function toggleSort(column: 'transacted_at' | 'amount_cents') {
