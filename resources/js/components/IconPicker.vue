@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import CategoryIcon, { CATEGORY_ICONS } from '@/components/CategoryIcon.vue';
+import CategoryIcon from '@/components/CategoryIcon.vue';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { CATEGORY_ICONS } from '@/lib/categoryIcons';
 
 const { t } = useI18n();
 

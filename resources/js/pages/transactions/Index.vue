@@ -9,7 +9,6 @@ import {
     Plus,
     Trash2,
 } from '@lucide/vue';
-import CategoryIcon from '@/components/CategoryIcon.vue';
 import { useI18n } from 'vue-i18n';
 import {
     create as createEntry,
@@ -18,6 +17,7 @@ import {
     index,
 } from '@/actions/App/Http/Controllers/Transaction/TransactionController';
 import { index as transfersIndex } from '@/actions/App/Http/Controllers/Transaction/TransferController';
+import CategoryIcon from '@/components/CategoryIcon.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useBrowserLocale } from '@/composables/useBrowserLocale';
