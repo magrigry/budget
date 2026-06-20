@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ['8.3', '8.4', '8.5']
+        php-version: ['8.4', '8.5']
 
     steps:
       - name: Checkout code
@@ -62,3 +62,8 @@ jobs:
 
       - name: Tests
         run: php artisan test
+
+      - name: Run Frontend Tests
+        run: npm run test -- --run
+        env:
+          LARAVEL_BYPASS_ENV_CHECK: 1
