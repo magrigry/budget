@@ -64,4 +64,4 @@ jobs:
         run: php artisan test
 
       - name: Run Frontend Tests
-        run: npm run test
+        run: npm run test -- --run
