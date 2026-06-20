@@ -29,7 +29,7 @@ import {
     Wrench,
     Zap,
 } from '@lucide/vue';
-import type { Component } from '@lucide/vue';
+import type { Component } from 'vue';
 
 export const CATEGORY_ICONS: Record<string, Component> = {
     shopping_cart: ShoppingCart,
