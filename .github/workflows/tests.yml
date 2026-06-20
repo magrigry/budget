@@ -62,3 +62,6 @@ jobs:
 
       - name: Tests
         run: php artisan test
+
+      - name: Run Frontend Tests
+        run: npm run test
