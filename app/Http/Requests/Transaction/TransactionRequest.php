@@ -21,6 +21,8 @@ abstract class TransactionRequest extends FormRequest
             'amount_cents' => ['required', 'integer', 'min:1'],
             'label' => ['required', 'string', 'max:255'],
             'transacted_at' => ['required', 'date'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ];
     }
 }

@@ -21,5 +21,7 @@ class TransactionData extends Data
         public readonly string $transacted_at,
         public readonly AccountData $account,
         public readonly ?CategoryData $category,
+        public readonly ?float $latitude = null,
+        public readonly ?float $longitude = null,
     ) {}
 }

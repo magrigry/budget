@@ -86,6 +86,17 @@ export default {
             date: 'Date',
             cancel: 'Annuler',
             save: 'Enregistrer',
+            location: {
+                fetching: 'Récupération de la position…',
+                granted: 'Position enregistrée',
+                denied: 'Accès à la position refusé',
+                unavailable: 'Géolocalisation non disponible',
+                enable: 'Enregistrer ma position',
+                existing: 'Position enregistrée',
+                recapture: 'Recapturer',
+                remove: 'Supprimer la position',
+                add: 'Ajouter ma position actuelle',
+            },
         },
     },
     categories: {

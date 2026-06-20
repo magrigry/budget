@@ -17,6 +17,8 @@ class TransactionManager
         string $label,
         CarbonImmutable $transactedAt,
         ?int $categoryId = null,
+        ?float $latitude = null,
+        ?float $longitude = null,
     ): Transaction {
         return Transaction::create([
             'user_id' => $user->id,
@@ -26,6 +28,8 @@ class TransactionManager
             'amount_cents' => $amountCents,
             'label' => $label,
             'transacted_at' => $transactedAt,
+            'latitude' => $latitude,
+            'longitude' => $longitude,
         ]);
     }
 
@@ -36,6 +40,8 @@ class TransactionManager
         string $label,
         CarbonImmutable $transactedAt,
         ?int $categoryId = null,
+        ?float $latitude = null,
+        ?float $longitude = null,
     ): void {
         $transaction->update([
             'account_id' => $accountId,
@@ -43,6 +49,8 @@ class TransactionManager
             'amount_cents' => $amountCents,
             'label' => $label,
             'transacted_at' => $transactedAt,
+            'latitude' => $latitude,
+            'longitude' => $longitude,
         ]);
     }
 

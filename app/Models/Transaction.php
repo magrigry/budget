@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $amount_cents
  * @property string $label
  * @property CarbonImmutable $transacted_at
+ * @property float|null $latitude
+ * @property float|null $longitude
  * @property CarbonImmutable|null $deleted_at
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
@@ -48,7 +50,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @mixin \Eloquent
  */
-#[Fillable(['user_id', 'account_id', 'category_id', 'type', 'amount_cents', 'label', 'transacted_at'])]
+#[Fillable(['user_id', 'account_id', 'category_id', 'type', 'amount_cents', 'label', 'transacted_at', 'latitude', 'longitude'])]
 class Transaction extends Model
 {
     /** @use HasFactory<TransactionFactory> */

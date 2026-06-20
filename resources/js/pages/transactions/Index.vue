@@ -4,6 +4,7 @@ import {
     ArrowDown,
     ArrowUp,
     ArrowUpDown,
+    MapPin,
     Pencil,
     Plus,
     Trash2,
@@ -20,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useBrowserLocale } from '@/composables/useBrowserLocale';
 import { formatDate } from '@/composables/useFormatDate';
+import { mapsUrl } from '@/composables/useGeolocation';
 
 const { t } = useI18n();
 const locale = useBrowserLocale();
@@ -350,33 +352,55 @@ function isNewPeriod(idx: number): boolean {
         </div>
 
         <!-- Mobile cards -->
-        <div class="md:hidden rounded-md border divide-y text-sm">
-            <template
-                v-for="(item, idx) in transactions.items"
-                :key="item.id"
-            >
+        <div class="divide-y rounded-md border text-sm md:hidden">
+            <template v-for="(item, idx) in transactions.items" :key="item.id">
                 <!-- Period header -->
                 <div
                     v-if="isNewPeriod(idx)"
-                    class="bg-muted/70 px-3 py-1.5 flex items-center justify-between gap-2"
+                    class="flex items-center justify-between gap-2 bg-muted/70 px-3 py-1.5"
                 >
-                    <span class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                    <span
+                        class="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+                    >
                         {{ periodLabel(periodKey(item.transacted_at)) }}
                     </span>
-                    <span class="flex items-center gap-2 text-xs font-semibold tabular-nums">
+                    <span
+                        class="flex items-center gap-2 text-xs font-semibold tabular-nums"
+                    >
                         <span class="text-green-600 dark:text-green-400">
-                            +{{ formatAmount(totals[periodKey(item.transacted_at)]?.income ?? 0) }}
+                            +{{
+                                formatAmount(
+                                    totals[periodKey(item.transacted_at)]
+                                        ?.income ?? 0,
+                                )
+                            }}
                         </span>
                         <span class="text-red-600 dark:text-red-400">
-                            −{{ formatAmount(totals[periodKey(item.transacted_at)]?.expense ?? 0) }}
+                            −{{
+                                formatAmount(
+                                    totals[periodKey(item.transacted_at)]
+                                        ?.expense ?? 0,
+                                )
+                            }}
                         </span>
                         <span
                             :class="{
-                                'text-green-600 dark:text-green-400': (totals[periodKey(item.transacted_at)]?.net ?? 0) >= 0,
-                                'text-red-600 dark:text-red-400': (totals[periodKey(item.transacted_at)]?.net ?? 0) < 0,
+                                'text-green-600 dark:text-green-400':
+                                    (totals[periodKey(item.transacted_at)]
+                                        ?.net ?? 0) >= 0,
+                                'text-red-600 dark:text-red-400':
+                                    (totals[periodKey(item.transacted_at)]
+                                        ?.net ?? 0) < 0,
                             }"
                         >
-                            = {{ formatAmount(totals[periodKey(item.transacted_at)]?.net ?? 0, true) }}
+                            =
+                            {{
+                                formatAmount(
+                                    totals[periodKey(item.transacted_at)]
+                                        ?.net ?? 0,
+                                    true,
+                                )
+                            }}
                         </span>
                     </span>
                 </div>
@@ -385,47 +409,102 @@ function isNewPeriod(idx: number): boolean {
                 <div class="px-3 py-2 hover:bg-muted/30">
                     <div class="flex items-start justify-between gap-2">
                         <div class="min-w-0 flex-1">
-                            <div class="font-medium truncate">{{ item.label }}</div>
-                            <div class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-                                <span class="tabular-nums">{{ formatDate(item.transacted_at) }}</span>
+                            <div class="truncate font-medium">
+                                {{ item.label }}
+                            </div>
+                            <div
+                                class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground"
+                            >
+                                <span class="tabular-nums">{{
+                                    formatDate(item.transacted_at)
+                                }}</span>
                                 <span>{{ item.account.name }}</span>
                                 <span
                                     v-if="item.category"
                                     class="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-medium"
-                                    :style="item.category.color ? { backgroundColor: item.category.color + '22', color: item.category.color } : {}"
-                                    :class="!item.category.color ? 'bg-muted text-muted-foreground' : ''"
+                                    :style="
+                                        item.category.color
+                                            ? {
+                                                  backgroundColor:
+                                                      item.category.color +
+                                                      '22',
+                                                  color: item.category.color,
+                                              }
+                                            : {}
+                                    "
+                                    :class="
+                                        !item.category.color
+                                            ? 'bg-muted text-muted-foreground'
+                                            : ''
+                                    "
                                 >
-                                    <span v-if="item.category.color" class="size-1.5 rounded-full" :style="{ backgroundColor: item.category.color }" />
+                                    <span
+                                        v-if="item.category.color"
+                                        class="size-1.5 rounded-full"
+                                        :style="{
+                                            backgroundColor:
+                                                item.category.color,
+                                        }"
+                                    />
                                     {{ item.category.name }}
                                 </span>
                             </div>
                         </div>
-                        <div class="flex items-center gap-1 shrink-0">
+                        <div class="flex shrink-0 items-center gap-1">
                             <div class="text-right">
                                 <div
                                     class="font-medium tabular-nums"
                                     :class="{
-                                        'text-green-600 dark:text-green-400': item.type === 'income',
-                                        'text-red-600 dark:text-red-400': item.type === 'expense',
+                                        'text-green-600 dark:text-green-400':
+                                            item.type === 'income',
+                                        'text-red-600 dark:text-red-400':
+                                            item.type === 'expense',
                                     }"
                                 >
-                                    {{ item.type === 'income' ? '+' : '−' }}{{ formatAmount(item.amount_cents) }}
+                                    {{ item.type === 'income' ? '+' : '−'
+                                    }}{{ formatAmount(item.amount_cents) }}
                                 </div>
                                 <div class="mt-0.5 flex justify-end">
                                     <span
                                         class="inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium"
                                         :class="{
-                                            'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': item.type === 'income',
-                                            'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400': item.type === 'expense',
+                                            'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':
+                                                item.type === 'income',
+                                            'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400':
+                                                item.type === 'expense',
                                         }"
                                     >
-                                        {{ t(`transactions.index.types.${item.type}`) }}
+                                        {{
+                                            t(
+                                                `transactions.index.types.${item.type}`,
+                                            )
+                                        }}
                                     </span>
                                 </div>
                             </div>
                             <div class="flex flex-col gap-0.5">
-                                <Button variant="ghost" size="icon" class="size-7" as-child>
-                                    <Link :href="editEntry({ transaction: item.id })">
+                                <a
+                                    v-if="item.latitude && item.longitude"
+                                    :href="
+                                        mapsUrl(item.latitude!, item.longitude!)
+                                    "
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+                                >
+                                    <MapPin class="size-3.5" />
+                                </a>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    class="size-7"
+                                    as-child
+                                >
+                                    <Link
+                                        :href="
+                                            editEntry({ transaction: item.id })
+                                        "
+                                    >
                                         <Pencil class="size-3.5" />
                                     </Link>
                                 </Button>
@@ -442,13 +521,16 @@ function isNewPeriod(idx: number): boolean {
                     </div>
                 </div>
             </template>
-            <div v-if="transactions.items.length === 0" class="px-4 py-10 text-center text-muted-foreground">
+            <div
+                v-if="transactions.items.length === 0"
+                class="px-4 py-10 text-center text-muted-foreground"
+            >
                 {{ t('transactions.index.empty') }}
             </div>
         </div>
 
         <!-- Desktop table -->
-        <div class="hidden md:block rounded-md border">
+        <div class="hidden rounded-md border md:block">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b bg-muted/50">
@@ -459,11 +541,16 @@ function isNewPeriod(idx: number): boolean {
                             <span class="flex items-center gap-1">
                                 {{ t('transactions.index.columns.date') }}
                                 <ArrowDown
-                                    v-if="filters.sort_by === 'transacted_at' && filters.sort_dir === 'desc'"
+                                    v-if="
+                                        filters.sort_by === 'transacted_at' &&
+                                        filters.sort_dir === 'desc'
+                                    "
                                     class="size-3"
                                 />
                                 <ArrowUp
-                                    v-else-if="filters.sort_by === 'transacted_at'"
+                                    v-else-if="
+                                        filters.sort_by === 'transacted_at'
+                                    "
                                     class="size-3"
                                 />
                                 <ArrowUpDown v-else class="size-3 opacity-40" />
@@ -488,11 +575,16 @@ function isNewPeriod(idx: number): boolean {
                             <span class="flex items-center justify-end gap-1">
                                 {{ t('transactions.index.columns.amount') }}
                                 <ArrowDown
-                                    v-if="filters.sort_by === 'amount_cents' && filters.sort_dir === 'desc'"
+                                    v-if="
+                                        filters.sort_by === 'amount_cents' &&
+                                        filters.sort_dir === 'desc'
+                                    "
                                     class="size-3"
                                 />
                                 <ArrowUp
-                                    v-else-if="filters.sort_by === 'amount_cents'"
+                                    v-else-if="
+                                        filters.sort_by === 'amount_cents'
+                                    "
                                     class="size-3"
                                 />
                                 <ArrowUpDown v-else class="size-3 opacity-40" />
@@ -507,7 +599,10 @@ function isNewPeriod(idx: number): boolean {
                         :key="item.id"
                     >
                         <!-- Period header row -->
-                        <tr v-if="isNewPeriod(idx)" class="border-b bg-muted/70">
+                        <tr
+                            v-if="isNewPeriod(idx)"
+                            class="border-b bg-muted/70"
+                        >
                             <td
                                 colspan="5"
                                 class="px-4 py-1.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase"
@@ -515,20 +610,62 @@ function isNewPeriod(idx: number): boolean {
                                 {{ periodLabel(periodKey(item.transacted_at)) }}
                             </td>
                             <td class="px-4 py-1.5 text-right tabular-nums">
-                                <span class="flex items-center justify-end gap-3 text-xs font-semibold">
-                                    <span class="text-green-600 dark:text-green-400">
-                                        +{{ formatAmount(totals[periodKey(item.transacted_at)]?.income ?? 0) }}
+                                <span
+                                    class="flex items-center justify-end gap-3 text-xs font-semibold"
+                                >
+                                    <span
+                                        class="text-green-600 dark:text-green-400"
+                                    >
+                                        +{{
+                                            formatAmount(
+                                                totals[
+                                                    periodKey(
+                                                        item.transacted_at,
+                                                    )
+                                                ]?.income ?? 0,
+                                            )
+                                        }}
                                     </span>
-                                    <span class="text-red-600 dark:text-red-400">
-                                        −{{ formatAmount(totals[periodKey(item.transacted_at)]?.expense ?? 0) }}
+                                    <span
+                                        class="text-red-600 dark:text-red-400"
+                                    >
+                                        −{{
+                                            formatAmount(
+                                                totals[
+                                                    periodKey(
+                                                        item.transacted_at,
+                                                    )
+                                                ]?.expense ?? 0,
+                                            )
+                                        }}
                                     </span>
                                     <span
                                         :class="{
-                                            'text-green-600 dark:text-green-400': (totals[periodKey(item.transacted_at)]?.net ?? 0) >= 0,
-                                            'text-red-600 dark:text-red-400': (totals[periodKey(item.transacted_at)]?.net ?? 0) < 0,
+                                            'text-green-600 dark:text-green-400':
+                                                (totals[
+                                                    periodKey(
+                                                        item.transacted_at,
+                                                    )
+                                                ]?.net ?? 0) >= 0,
+                                            'text-red-600 dark:text-red-400':
+                                                (totals[
+                                                    periodKey(
+                                                        item.transacted_at,
+                                                    )
+                                                ]?.net ?? 0) < 0,
                                         }"
                                     >
-                                        = {{ formatAmount(totals[periodKey(item.transacted_at)]?.net ?? 0, true) }}
+                                        =
+                                        {{
+                                            formatAmount(
+                                                totals[
+                                                    periodKey(
+                                                        item.transacted_at,
+                                                    )
+                                                ]?.net ?? 0,
+                                                true,
+                                            )
+                                        }}
                                     </span>
                                 </span>
                             </td>
@@ -537,7 +674,9 @@ function isNewPeriod(idx: number): boolean {
 
                         <!-- Transaction row -->
                         <tr class="border-b last:border-0 hover:bg-muted/30">
-                            <td class="px-4 py-2 text-muted-foreground tabular-nums">
+                            <td
+                                class="px-4 py-2 text-muted-foreground tabular-nums"
+                            >
                                 {{ formatDate(item.transacted_at) }}
                             </td>
                             <td class="px-4 py-2 font-medium">
@@ -547,17 +686,35 @@ function isNewPeriod(idx: number): boolean {
                                 <span
                                     v-if="item.category"
                                     class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
-                                    :style="item.category.color ? { backgroundColor: item.category.color + '22', color: item.category.color } : {}"
-                                    :class="!item.category.color ? 'bg-muted text-muted-foreground' : ''"
+                                    :style="
+                                        item.category.color
+                                            ? {
+                                                  backgroundColor:
+                                                      item.category.color +
+                                                      '22',
+                                                  color: item.category.color,
+                                              }
+                                            : {}
+                                    "
+                                    :class="
+                                        !item.category.color
+                                            ? 'bg-muted text-muted-foreground'
+                                            : ''
+                                    "
                                 >
                                     <span
                                         v-if="item.category.color"
                                         class="size-1.5 rounded-full"
-                                        :style="{ backgroundColor: item.category.color }"
+                                        :style="{
+                                            backgroundColor:
+                                                item.category.color,
+                                        }"
                                     />
                                     {{ item.category.name }}
                                 </span>
-                                <span v-else class="text-muted-foreground">—</span>
+                                <span v-else class="text-muted-foreground"
+                                    >—</span
+                                >
                             </td>
                             <td class="px-4 py-2 text-muted-foreground">
                                 {{ item.account.name }}
@@ -566,26 +723,60 @@ function isNewPeriod(idx: number): boolean {
                                 <span
                                     class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
                                     :class="{
-                                        'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': item.type === 'income',
-                                        'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400': item.type === 'expense',
+                                        'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':
+                                            item.type === 'income',
+                                        'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400':
+                                            item.type === 'expense',
                                     }"
                                 >
-                                    {{ t(`transactions.index.types.${item.type}`) }}
+                                    {{
+                                        t(
+                                            `transactions.index.types.${item.type}`,
+                                        )
+                                    }}
                                 </span>
                             </td>
                             <td
                                 class="px-4 py-2 text-right tabular-nums"
                                 :class="{
-                                    'text-green-600 dark:text-green-400': item.type === 'income',
-                                    'text-red-600 dark:text-red-400': item.type === 'expense',
+                                    'text-green-600 dark:text-green-400':
+                                        item.type === 'income',
+                                    'text-red-600 dark:text-red-400':
+                                        item.type === 'expense',
                                 }"
                             >
-                                {{ item.type === 'income' ? '+' : '−' }}{{ formatAmount(item.amount_cents) }}
+                                {{ item.type === 'income' ? '+' : '−'
+                                }}{{ formatAmount(item.amount_cents) }}
                             </td>
                             <td class="px-4 py-2">
                                 <div class="flex justify-end gap-1">
-                                    <Button variant="ghost" size="icon" class="size-7" as-child>
-                                        <Link :href="editEntry({ transaction: item.id })">
+                                    <a
+                                        v-if="item.latitude && item.longitude"
+                                        :href="
+                                            mapsUrl(
+                                                item.latitude!,
+                                                item.longitude!,
+                                            )
+                                        "
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+                                    >
+                                        <MapPin class="size-3.5" />
+                                    </a>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        class="size-7"
+                                        as-child
+                                    >
+                                        <Link
+                                            :href="
+                                                editEntry({
+                                                    transaction: item.id,
+                                                })
+                                            "
+                                        >
                                             <Pencil class="size-3.5" />
                                         </Link>
                                     </Button>
@@ -602,7 +793,10 @@ function isNewPeriod(idx: number): boolean {
                         </tr>
                     </template>
                     <tr v-if="transactions.items.length === 0">
-                        <td colspan="7" class="px-4 py-10 text-center text-muted-foreground">
+                        <td
+                            colspan="7"
+                            class="px-4 py-10 text-center text-muted-foreground"
+                        >
                             {{ t('transactions.index.empty') }}
                         </td>
                     </tr>

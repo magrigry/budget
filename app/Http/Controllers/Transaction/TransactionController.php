@@ -130,6 +130,8 @@ class TransactionController extends Controller
             $validated['label'],
             CarbonImmutable::parse($validated['transacted_at']),
             $validated['category_id'] ?? null,
+            isset($validated['latitude']) ? (float) $validated['latitude'] : null,
+            isset($validated['longitude']) ? (float) $validated['longitude'] : null,
         );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('transactions.flash.created')]);
@@ -167,6 +169,8 @@ class TransactionController extends Controller
             $validated['label'],
             CarbonImmutable::parse($validated['transacted_at']),
             $validated['category_id'] ?? null,
+            isset($validated['latitude']) ? (float) $validated['latitude'] : null,
+            isset($validated['longitude']) ? (float) $validated['longitude'] : null,
         );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('transactions.flash.updated')]);

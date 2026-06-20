@@ -86,6 +86,17 @@ export default {
             date: 'Date',
             cancel: 'Cancel',
             save: 'Save',
+            location: {
+                fetching: 'Retrieving location…',
+                granted: 'Location will be saved',
+                denied: 'Location access denied',
+                unavailable: 'Geolocation unavailable',
+                enable: 'Save my location',
+                existing: 'Location saved',
+                recapture: 'Recapture',
+                remove: 'Remove location',
+                add: 'Add current location',
+            },
         },
     },
     categories: {

@@ -26,6 +26,8 @@ declare namespace App {
                 readonly transacted_at: string;
                 readonly account: App.Data.Account;
                 readonly category: App.Data.Category | null;
+                readonly latitude: number | null;
+                readonly longitude: number | null;
             };
             export type Transfer = {
                 readonly id: number;

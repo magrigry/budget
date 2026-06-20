@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { Link, useForm } from '@inertiajs/vue3';
+import { Loader2, MapPin, MapPinOff, MapPinX } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { index } from '@/actions/App/Http/Controllers/Transaction/TransactionController';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { mapsUrl, useGeolocation } from '@/composables/useGeolocation';
 
 const { t } = useI18n();
+const { state: geoState, coordinates, requestAndFetch } = useGeolocation();
 
 interface FormFields {
     type: App.Enums.TransactionType;
@@ -16,6 +19,8 @@ interface FormFields {
     amount: number;
     label: string;
     transacted_at: string;
+    latitude: number | null;
+    longitude: number | null;
 }
 
 const props = withDefaults(
@@ -38,6 +43,8 @@ const form = useForm<FormFields>({
     amount: props.transaction ? props.transaction.amount_cents / 100 : 0,
     label: props.transaction?.label ?? '',
     transacted_at: props.transaction?.transacted_at ?? today,
+    latitude: props.transaction?.latitude ?? null,
+    longitude: props.transaction?.longitude ?? null,
 });
 
 form.transform((data) => ({
@@ -47,9 +54,35 @@ form.transform((data) => ({
     amount_cents: Math.round(data.amount * 100),
     label: data.label,
     transacted_at: data.transacted_at,
+    latitude: data.latitude,
+    longitude: data.longitude,
 }));
 
+async function captureLocation() {
+    try {
+        const coords = await requestAndFetch();
+        form.latitude = coords.latitude;
+        form.longitude = coords.longitude;
+    } catch {
+        // denied or unavailable — state already updated by composable
+    }
+}
+
+function removeLocation() {
+    form.latitude = null;
+    form.longitude = null;
+}
+
 function handleSubmit() {
+    if (
+        !props.transaction &&
+        geoState.value === 'granted' &&
+        coordinates.value
+    ) {
+        form.latitude = coordinates.value.latitude;
+        form.longitude = coordinates.value.longitude;
+    }
+
     props.onSubmit(form);
 }
 </script>
@@ -158,11 +191,99 @@ function handleSubmit() {
             <InputError :message="form.errors.label" />
         </div>
 
+        <!-- Geolocation -->
+        <div>
+            <!-- Create mode: browser permission indicator -->
+            <template v-if="!transaction">
+                <span
+                    v-if="geoState === 'fetching'"
+                    class="flex items-center gap-1.5 text-xs text-muted-foreground"
+                >
+                    <Loader2 class="h-3.5 w-3.5 animate-spin" />
+                    {{ t('transactions.form.location.fetching') }}
+                </span>
+                <span
+                    v-else-if="geoState === 'granted'"
+                    class="flex items-center gap-1.5 text-xs text-muted-foreground"
+                >
+                    <MapPin class="h-3.5 w-3.5 text-green-500" />
+                    {{ t('transactions.form.location.granted') }}
+                </span>
+                <span
+                    v-else-if="geoState === 'denied'"
+                    class="flex items-center gap-1.5 text-xs text-muted-foreground"
+                >
+                    <MapPinOff class="h-3.5 w-3.5 text-red-400" />
+                    {{ t('transactions.form.location.denied') }}
+                </span>
+                <span
+                    v-else-if="geoState === 'unavailable'"
+                    class="flex items-center gap-1.5 text-xs text-muted-foreground"
+                >
+                    <MapPinX class="h-3.5 w-3.5 text-muted-foreground" />
+                    {{ t('transactions.form.location.unavailable') }}
+                </span>
+                <button
+                    v-else
+                    type="button"
+                    class="flex items-center gap-1.5 text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                    @click="captureLocation"
+                >
+                    <MapPin class="h-3.5 w-3.5" />
+                    {{ t('transactions.form.location.enable') }}
+                </button>
+            </template>
+
+            <!-- Edit mode: manage saved location -->
+            <template v-else>
+                <div
+                    v-if="form.latitude && form.longitude"
+                    class="flex items-center gap-3"
+                >
+                    <a
+                        :href="mapsUrl(form.latitude!, form.longitude!)"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="flex items-center gap-1.5 text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                    >
+                        <MapPin class="h-3.5 w-3.5 text-green-500" />
+                        {{ t('transactions.form.location.existing') }}
+                    </a>
+                    <button
+                        type="button"
+                        class="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                        @click="captureLocation"
+                    >
+                        {{ t('transactions.form.location.recapture') }}
+                    </button>
+                    <button
+                        type="button"
+                        class="text-xs text-muted-foreground underline-offset-2 hover:text-destructive hover:underline"
+                        @click="removeLocation"
+                    >
+                        {{ t('transactions.form.location.remove') }}
+                    </button>
+                </div>
+                <button
+                    v-else
+                    type="button"
+                    class="flex items-center gap-1.5 text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                    @click="captureLocation"
+                >
+                    <MapPin class="h-3.5 w-3.5" />
+                    {{ t('transactions.form.location.add') }}
+                </button>
+            </template>
+        </div>
+
         <div class="flex justify-end gap-3">
             <Button as-child variant="outline">
                 <Link :href="index()">{{ t('transactions.form.cancel') }}</Link>
             </Button>
-            <Button type="submit" :disabled="form.processing">
+            <Button
+                type="submit"
+                :disabled="form.processing || geoState === 'fetching'"
+            >
                 {{ submitLabel ?? t('transactions.form.save') }}
             </Button>
         </div>
