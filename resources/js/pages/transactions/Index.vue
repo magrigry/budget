@@ -9,6 +9,7 @@ import {
     Plus,
     Trash2,
 } from '@lucide/vue';
+import CategoryIcon from '@/components/CategoryIcon.vue';
 import { useI18n } from 'vue-i18n';
 import {
     create as createEntry,
@@ -438,8 +439,13 @@ function isNewPeriod(idx: number): boolean {
                                             : ''
                                     "
                                 >
+                                    <CategoryIcon
+                                        v-if="item.category.icon"
+                                        :icon="item.category.icon"
+                                        class="size-3"
+                                    />
                                     <span
-                                        v-if="item.category.color"
+                                        v-else-if="item.category.color"
                                         class="size-1.5 rounded-full"
                                         :style="{
                                             backgroundColor:
@@ -702,8 +708,13 @@ function isNewPeriod(idx: number): boolean {
                                             : ''
                                     "
                                 >
+                                    <CategoryIcon
+                                        v-if="item.category.icon"
+                                        :icon="item.category.icon"
+                                        class="size-3"
+                                    />
                                     <span
-                                        v-if="item.category.color"
+                                        v-else-if="item.category.color"
                                         class="size-1.5 rounded-full"
                                         :style="{
                                             backgroundColor:

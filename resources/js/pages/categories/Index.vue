@@ -7,6 +7,7 @@ import {
     destroy as destroyEntry,
     edit as editEntry,
 } from '@/actions/App/Http/Controllers/CategoryController';
+import CategoryIcon from '@/components/CategoryIcon.vue';
 import { Button } from '@/components/ui/button';
 
 const { t } = useI18n();
@@ -47,6 +48,9 @@ function deleteItem(item: App.Data.Category) {
                         <th class="w-10 px-4 py-2 text-left font-medium">
                             {{ t('categories.index.columns.color') }}
                         </th>
+                        <th class="w-10 px-4 py-2 text-left font-medium">
+                            {{ t('categories.index.columns.icon') }}
+                        </th>
                         <th class="px-4 py-2 text-left font-medium">
                             {{ t('categories.index.columns.name') }}
                         </th>
@@ -68,6 +72,12 @@ function deleteItem(item: App.Data.Category) {
                             <span
                                 v-else
                                 class="inline-block size-5 rounded-full border bg-muted"
+                            />
+                        </td>
+                        <td class="px-4 py-2">
+                            <CategoryIcon
+                                :icon="item.icon"
+                                class="size-4 text-muted-foreground"
                             />
                         </td>
                         <td class="px-4 py-2 font-medium">{{ item.name }}</td>
@@ -98,7 +108,7 @@ function deleteItem(item: App.Data.Category) {
                     </tr>
                     <tr v-if="categories.length === 0">
                         <td
-                            colspan="3"
+                            colspan="4"
                             class="px-4 py-10 text-center text-muted-foreground"
                         >
                             {{ t('categories.index.empty') }}

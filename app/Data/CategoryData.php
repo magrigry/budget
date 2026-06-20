@@ -13,6 +13,7 @@ class CategoryData extends Data
         public readonly int $id,
         public readonly string $name,
         public readonly ?string $color,
+        public readonly ?string $icon,
     ) {}
 
     public static function fromModel(Category $category): self
@@ -21,6 +22,7 @@ class CategoryData extends Data
             id: $category->id,
             name: $category->name,
             color: $category->color,
+            icon: $category->icon,
         );
     }
 }
