@@ -17,6 +17,7 @@ import {
     index,
 } from '@/actions/App/Http/Controllers/Transaction/TransactionController';
 import { index as transfersIndex } from '@/actions/App/Http/Controllers/Transaction/TransferController';
+import CategoryIcon from '@/components/CategoryIcon.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useBrowserLocale } from '@/composables/useBrowserLocale';
@@ -438,8 +439,13 @@ function isNewPeriod(idx: number): boolean {
                                             : ''
                                     "
                                 >
+                                    <CategoryIcon
+                                        v-if="item.category.icon"
+                                        :icon="item.category.icon"
+                                        class="size-3"
+                                    />
                                     <span
-                                        v-if="item.category.color"
+                                        v-else-if="item.category.color"
                                         class="size-1.5 rounded-full"
                                         :style="{
                                             backgroundColor:
@@ -702,8 +708,13 @@ function isNewPeriod(idx: number): boolean {
                                             : ''
                                     "
                                 >
+                                    <CategoryIcon
+                                        v-if="item.category.icon"
+                                        :icon="item.category.icon"
+                                        class="size-3"
+                                    />
                                     <span
-                                        v-if="item.category.color"
+                                        v-else-if="item.category.color"
                                         class="size-1.5 rounded-full"
                                         :style="{
                                             backgroundColor:

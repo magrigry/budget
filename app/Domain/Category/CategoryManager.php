@@ -7,20 +7,22 @@ use App\Models\User;
 
 class CategoryManager
 {
-    public function store(User $user, string $name, ?string $color): Category
+    public function store(User $user, string $name, ?string $color, ?string $icon): Category
     {
         return Category::create([
             'user_id' => $user->id,
             'name' => $name,
             'color' => $color,
+            'icon' => $icon,
         ]);
     }
 
-    public function update(Category $category, string $name, ?string $color): void
+    public function update(Category $category, string $name, ?string $color, ?string $icon): void
     {
         $category->update([
             'name' => $name,
             'color' => $color,
+            'icon' => $icon,
         ]);
     }
 

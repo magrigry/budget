@@ -14,6 +14,7 @@ declare namespace App {
             readonly id: number;
             readonly name: string;
             readonly color: string | null;
+            readonly icon: string | null;
         };
         namespace Transaction {
             export type Transaction = {

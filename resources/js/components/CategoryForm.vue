@@ -2,6 +2,7 @@
 import { Link, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { index } from '@/actions/App/Http/Controllers/CategoryController';
+import IconPicker from '@/components/IconPicker.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +13,7 @@ const { t } = useI18n();
 interface FormFields {
     name: string;
     color: string;
+    icon: string;
 }
 
 const props = withDefaults(
@@ -26,11 +28,13 @@ const props = withDefaults(
 const form = useForm<FormFields>({
     name: props.category?.name ?? '',
     color: props.category?.color ?? '',
+    icon: props.category?.icon ?? '',
 });
 
 form.transform((data) => ({
     name: data.name,
     color: data.color || null,
+    icon: data.icon || null,
 }));
 
 function handleSubmit() {
@@ -99,6 +103,9 @@ function handleSubmit() {
             </div>
             <InputError :message="form.errors.color" />
         </div>
+
+        <IconPicker v-model="form.icon" />
+        <InputError :message="form.errors.icon" />
 
         <div class="flex justify-end gap-3">
             <Button as-child variant="outline">

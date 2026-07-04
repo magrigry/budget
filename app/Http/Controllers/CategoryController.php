@@ -45,6 +45,7 @@ class CategoryController extends Controller
             $request->user(),
             $validated['name'],
             $validated['color'] ?? null,
+            $validated['icon'] ?? null,
         );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('categories.flash.created')]);
@@ -71,6 +72,7 @@ class CategoryController extends Controller
             $category,
             $validated['name'],
             $validated['color'] ?? null,
+            $validated['icon'] ?? null,
         );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('categories.flash.updated')]);

@@ -8,6 +8,7 @@ return [
         'columns' => [
             'name' => 'Name',
             'color' => 'Color',
+            'icon' => 'Icon',
         ],
     ],
     'create' => [
@@ -25,6 +26,9 @@ return [
         'colorOptional' => '(optional)',
         'colorPick' => 'Pick a color',
         'colorClear' => 'Remove',
+        'icon' => 'Icon',
+        'iconOptional' => '(optional)',
+        'iconClear' => 'Remove icon',
         'cancel' => 'Cancel',
         'save' => 'Save',
     ],

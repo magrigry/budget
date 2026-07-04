@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $user_id
  * @property string $name
  * @property string|null $color
+ * @property string|null $icon
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  * @property-read User $user
@@ -34,7 +35,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * @mixin \Eloquent
  */
-#[Fillable(['user_id', 'name', 'color'])]
+#[Fillable(['user_id', 'name', 'color', 'icon'])]
 class Category extends Model
 {
     /** @return BelongsTo<User, $this> */
